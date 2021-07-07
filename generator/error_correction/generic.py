@@ -85,31 +85,38 @@ class GenericDecoder(Elaboratable):
 
                 m.d.comb += syndrome_signal[row_idx].eq(reduce(lambda a, b: a ^ b, input_parts, 0))
 
-            # Determine if an error happend
+            # Determine if an error happened
             m.d.comb += self.error.eq(syndrome_signal.any())
+
+            # Calculate which syndromes cause a bit to flip
+            flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
+            for error in self.code.correctable_errors:
+                error_syn = sum(self.code.parity_check_matrix.T[i] for i in error)
+
+                for i in error:
+                    flip_bit_syndromes[i].append(np_array_to_value(error_syn))
+            print(flip_bit_syndromes)
+
+            # Flip the input bits if correction is required
+            flips = Signal(unsigned(self.code.total_bits))
+            for bit, syndromes in enumerate(flip_bit_syndromes):
+                flip = reduce(
+                    lambda a, b: a | b,
+                    (syndrome_signal == syndrome for syndrome in syndromes),
+                    C(False)
+                )
+                m.d.comb += flips[bit].eq(flip)
+
+            m.d.comb += self.enc_out.eq(self.enc_in ^ flips)
+
+            # Determine if an uncorrectable error happened
+            m.d.comb += self.uncorrectable_error.eq(self.error & (flips == 0))
         else:
-            m.d.comb += self.error.eq(0)
-
-        # Calculate which syndromes cause a bit to flip
-        flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
-        for error in self.code.correctable_errors:
-            error_syn = sum(self.code.parity_check_matrix.T[i] for i in error)
-
-            for i in error:
-                flip_bit_syndromes[i].append(np_array_to_value(error_syn))
-        print(flip_bit_syndromes)
-
-        # Flip the input bits if correction is required
-        flips = Signal(unsigned(self.code.total_bits))
-        for bit, syndromes in enumerate(flip_bit_syndromes):
-            flip = reduce(
-                lambda a, b: a | b,
-                (syndrome_signal == syndrome for syndrome in syndromes),
-                C(False)
-            )
-            m.d.comb += flips[bit].eq(flip)
-
-        m.d.comb += self.enc_out.eq(self.enc_in ^ flips)
+            m.d.comb += [
+                self.error.eq(0),
+                self.uncorrectable_error.eq(0),
+                self.enc_out.eq(self.enc_in),
+            ]
 
         # Connect the correct input bits to the output
         for bit in range(self.code.data_bits):
@@ -119,9 +126,6 @@ class GenericDecoder(Elaboratable):
 
                 if (col == match_vec).all():
                     m.d.comb += self.data_out[bit].eq(self.enc_out[col_idx])
-
-        # Determine if an uncorrectable error happend
-        m.d.comb += self.uncorrectable_error.eq(self.error & (flips == 0))
 
         return m
 
