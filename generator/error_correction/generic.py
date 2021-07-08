@@ -1,9 +1,10 @@
 import abc
 from functools import reduce
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import numpy as np
 from nmigen import *
+from numpy.typing import NDArray
 
 from .matrix_util import np_array_to_value
 
@@ -23,9 +24,9 @@ class GenericCode(abc.ABC):
         self.data_bits = data_bits
         self.parity_bits = parity_bits
 
-        self.generator_matrix = None
-        self.parity_check_matrix = None
-        self.correctable_errors = []
+        self.generator_matrix: Optional[NDArray] = None
+        self.parity_check_matrix: Optional[NDArray] = None
+        self.correctable_errors: List[Tuple] = []
 
     @property
     def total_bits(self) -> int:
