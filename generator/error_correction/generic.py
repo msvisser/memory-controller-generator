@@ -162,9 +162,12 @@ class GenericDecoder(Elaboratable):
             # Calculate which syndromes cause a bit to flip
             flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
             for error in self.code.correctable_errors:
-                # Calculate the linear combination of the error bit columns in the parity-check matrix. The modulo
-                # two operation is required to make sure the result is a binary vector.
-                error_syn = (sum(self.code.parity_check_matrix.T[i] for i in error) % 2)
+                # Calculate the linear combination of the error bit columns in the parity-check matrix.
+                error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
+                for i in error:
+                    error_syn += self.code.parity_check_matrix.T[i]
+                # Make sure the syndrome vector is actually a binary vector
+                error_syn %= 2
 
                 for i in error:
                     flip_bit_syndromes[i].append(np_array_to_value(error_syn))
@@ -202,7 +205,7 @@ class GenericDecoder(Elaboratable):
                 match_vec = np.zeros((self.code.data_bits,))
                 match_vec[bit] = 1
 
-                if (col == match_vec).all():
+                if np.array_equal(col, match_vec):
                     m.d.comb += self.data_out[bit].eq(self.enc_out[col_idx])
                     break
             else:
