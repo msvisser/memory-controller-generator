@@ -4,13 +4,16 @@ from nmigen.asserts import Assert
 
 from functools import reduce
 
-from generator.error_correction import ExtendedHammingCode, HammingCode, IdentityCode
+from generator.error_correction import ExtendedHammingCode, HammingCode, ParityCode, IdentityCode
 
 
 class TestTop(Elaboratable):
     def __init__(self, data_bits):
         self.data_bits = data_bits
         self.code = ExtendedHammingCode(data_bits=data_bits)
+
+        self.write_data = Signal(unsigned(self.code.total_bits))
+        self.read_data = Signal(unsigned(self.code.total_bits))
 
         self.data_in = Signal(unsigned(self.code.data_bits))
         self.data_out = Signal(unsigned(self.code.data_bits))
@@ -28,11 +31,13 @@ class TestTop(Elaboratable):
 
         m.d.comb += [
             encoder.data_in.eq(self.data_in),
+            self.write_data.eq(encoder.enc_out),
+            decoder.enc_in.eq(self.read_data),
             self.data_out.eq(decoder.data_out),
         ]
 
         if platform == "formal":
-            m.d.comb += decoder.enc_in.eq(encoder.enc_out ^ self.flips)
+            m.d.comb += self.read_data.eq(self.write_data ^ self.flips)
 
             flips_set = Signal(unsigned(8))
             m.d.comb += flips_set.eq(reduce(
@@ -63,7 +68,6 @@ class TestTop(Elaboratable):
                     Assert(decoder.uncorrectable_error),
                 ]
         else:
-            m.d.comb += decoder.enc_in.eq(encoder.enc_out ^ self.flips)
             m.d.comb += [
                 self.error.eq(decoder.error),
                 self.uncorrectable_error.eq(decoder.uncorrectable_error),
@@ -72,7 +76,11 @@ class TestTop(Elaboratable):
         return m
 
     def ports(self):
-        return [self.data_in, self.data_out, self.flips]
+        return [
+            self.write_data, self.read_data,
+            self.data_in, self.data_out, self.flips,
+            self.error, self.uncorrectable_error
+        ]
 
 
 if __name__ == "__main__":
