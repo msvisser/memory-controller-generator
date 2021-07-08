@@ -1,6 +1,6 @@
 import numpy as np
 from . import GenericCode
-from .matrix_util import transform_check_matrix_to_systematic, generate_matrix_from_check_matrix
+from .matrix_util import generator_matrix_from_parity_check_matrix
 
 
 class HammingCode(GenericCode):
@@ -26,15 +26,8 @@ class HammingCode(GenericCode):
             for bit in range(self.parity_bits):
                 col[bit] = 1 if (col_idx + 1) & (1 << bit) else 0
 
-        # Calculate the systematic parity-check and generator matrix
-        parity_check_systematic = np.array(self.parity_check_matrix, dtype=np.uint)
-        col_swaps = transform_check_matrix_to_systematic(parity_check_systematic)
-        generator_systematic = generate_matrix_from_check_matrix(parity_check_systematic)
-
-        # Calculate the generator matrix for the original parity-check matrix
-        self.generator_matrix = np.array(generator_systematic, dtype=np.uint)
-        for (a, b) in col_swaps[::-1]:
-            self.generator_matrix[:, [b, a]] = self.generator_matrix[:, [a, b]]
+        # Create the generator matrix from the parity-check matrix
+        self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
 
         # Add the list of correctable errors
         for i in range(self.total_bits):
@@ -60,15 +53,8 @@ class ExtendedHammingCode(HammingCode):
         # Fill the bottom row with ones
         self.parity_check_matrix[-1] = np.ones((self.total_bits,))
 
-        # Calculate the systematic parity-check and generator matrix
-        parity_check_systematic = np.array(self.parity_check_matrix, dtype=np.uint)
-        col_swaps = transform_check_matrix_to_systematic(parity_check_systematic)
-        generator_systematic = generate_matrix_from_check_matrix(parity_check_systematic)
-
-        # Calculate the generator matrix for the original parity-check matrix
-        self.generator_matrix = np.array(generator_systematic, dtype=np.uint)
-        for (a, b) in col_swaps[::-1]:
-            self.generator_matrix[:, [b, a]] = self.generator_matrix[:, [a, b]]
+        # Create the generator matrix from the parity-check matrix
+        self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
 
         # Add the list of correctable errors
         for i in range(self.total_bits):
