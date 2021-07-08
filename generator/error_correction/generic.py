@@ -165,9 +165,7 @@ class GenericDecoder(Elaboratable):
                 # Calculate the linear combination of the error bit columns in the parity-check matrix.
                 error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
                 for i in error:
-                    error_syn += self.code.parity_check_matrix.T[i]
-                # Make sure the syndrome vector is actually a binary vector
-                error_syn %= 2
+                    error_syn ^= self.code.parity_check_matrix.T[i]
 
                 for i in error:
                     flip_bit_syndromes[i].append(np_array_to_value(error_syn))
