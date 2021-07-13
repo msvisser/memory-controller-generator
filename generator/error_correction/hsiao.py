@@ -1,7 +1,7 @@
 import itertools
 import math
-from collections import Counter
 import time
+from collections import Counter
 from typing import Optional
 
 import numpy as np
@@ -11,7 +11,19 @@ from .matrix_util import generator_matrix_from_systematic
 
 
 class HsiaoCode(GenericCode):
+    """
+    Implementation of a Hsiao code (SEC-DED).
+
+    This class implements a Hsiao code using an exhaustive search method. This will search all possible parity-check
+    matrices which conform to the Hsiao code specification. That is, all columns will be unique and of odd weight.
+    All possible matrices will be searched, and the matrix with the most balanced rows will be chosen.
+
+    The definition of this code can be found in: M.Y. Hsiao, "A Class of Optimal Minimum Odd-weight-column SEC-DED
+    Codes", IBM Journal of Research & Development, 1970.
+    """
+
     def __init__(self, data_bits: int):
+        # Determine the number of parity bits required for the specified number of data bits
         parity_bits = 0
         for m in itertools.count():
             if 2 ** m - m - 1 >= data_bits:
