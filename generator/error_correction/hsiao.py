@@ -54,7 +54,6 @@ class HsiaoCode(GenericCode):
         flexible_columns = itertools.combinations(range(self.parity_bits), num_ones)
         # Create an iterator over all possible options
         flexible_column_combinations = itertools.combinations(flexible_columns, columns_needed)
-        print(math.comb(math.comb(self.parity_bits, num_ones), columns_needed))
 
         lowest_diff = None
         lowest_candidate = None
