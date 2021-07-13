@@ -75,6 +75,26 @@ class GenericCode(abc.ABC):
 
         return GenericDecoder(self)
 
+    def flip_calculator(self) -> "GenericFlipCalculator":
+        """
+        Construct a flip calculator module for this code.
+
+        :return: GenericFlipCalculator for this code
+        :raises ValueError: if the parity-check matrix is None
+        """
+        if self.parity_check_matrix is None:
+            raise ValueError("Parity-check matrix is None")
+
+        return GenericFlipCalculator(self)
+
+    def error_calculator(self) -> "GenericErrorCalculator":
+        """
+        Construct an error calculator module for this code.
+
+        :return: GenericErrorCalculator for this code
+        """
+        return GenericErrorCalculator(self)
+
 
 class GenericEncoder(Elaboratable):
     """
@@ -148,6 +168,9 @@ class GenericDecoder(Elaboratable):
         """Elaborate the module implementation"""
         m = Module()
 
+        m.submodules.error_calculator = error_calculator = self.code.error_calculator()
+        m.submodules.flip_calculator = flip_calculator = self.code.flip_calculator()
+
         if self.code.parity_bits > 0:
             # Calculate the syndrome for this parity-check matrix
             syndrome_signal = Signal(unsigned(self.code.parity_bits))
@@ -159,34 +182,18 @@ class GenericDecoder(Elaboratable):
 
                 m.d.comb += syndrome_signal[row_idx].eq(reduce(lambda a, b: a ^ b, input_parts, 0))
 
-            # Calculate which syndromes cause a bit to flip
-            flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
-            for error in self.code.correctable_errors:
-                # Calculate the linear combination of the error bit columns in the parity-check matrix.
-                error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
-                for i in error:
-                    error_syn ^= self.code.parity_check_matrix.T[i]
-
-                for i in error:
-                    flip_bit_syndromes[i].append(np_array_to_value(error_syn))
-
-            # Calculate which bits to flip to correct the error(s)
-            flips = Signal(unsigned(self.code.total_bits))
-            for bit, syndromes in enumerate(flip_bit_syndromes):
-                flip = reduce(
-                    lambda a, b: a | b,
-                    (syndrome_signal == syndrome for syndrome in syndromes),
-                    C(False)
-                )
-                m.d.comb += flips[bit].eq(flip)
+            # Send the calculated syndrome to the flips calculator
+            m.d.comb += flip_calculator.syndrome.eq(syndrome_signal)
 
             # Flip the input bits to correct any errors
-            m.d.comb += self.enc_out.eq(self.enc_in ^ flips)
+            m.d.comb += self.enc_out.eq(self.enc_in ^ flip_calculator.flips)
 
             # Determine if an error or uncorrectable error happened
             m.d.comb += [
-                self.error.eq(syndrome_signal.any()),
-                self.uncorrectable_error.eq(self.error & (flips == 0)),
+                error_calculator.syndrome.eq(syndrome_signal),
+                error_calculator.flips.eq(flip_calculator.flips),
+                self.error.eq(error_calculator.error),
+                self.uncorrectable_error.eq(error_calculator.uncorrectable_error),
             ]
         else:
             # If there are no parity bits, no error can be detected, and the corrected encoded data will be identical
@@ -214,3 +221,99 @@ class GenericDecoder(Elaboratable):
     def ports(self) -> List[Signal]:
         """List of module signals externally available"""
         return [self.enc_in, self.enc_out, self.data_out, self.error, self.uncorrectable_error]
+
+
+class GenericFlipCalculator(Elaboratable):
+    """
+    Generic implementation of a flip calculator for a decoder module.
+
+    This class provides the calculation of which bits to flip based on the supplied syndrome signal. Calculating when
+    to flip a bit can be done using the parity-check matrix and a list of correctable errors. First, the syndrome
+    value for each correctable error is calculated. Second, for each bit we match all syndromes that require the bit
+    to flip.
+
+    This implementation take the naive approach of completely matching the syndrome for each error. While this
+    approach will always work for codes with a valid parity-check matrix and respective correctable error list,
+    it might not be the most optimal solution. Error correction codes that require a different implementation can
+    override the ``flip_calculator`` method of ``GenericCode`` to return their own implementation.
+    """
+
+    def __init__(self, code: GenericCode):
+        self.code = code
+
+        self.syndrome = Signal(unsigned(code.parity_bits))
+        """Input of the error correction syndrome"""
+        self.flips = Signal(unsigned(code.total_bits))
+        """Output of the bits to flip"""
+
+    def elaborate(self, platform) -> Module:
+        """Elaborate the module implementation"""
+        m = Module()
+
+        # Calculate which syndromes cause a bit to flip
+        flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
+        for error in self.code.correctable_errors:
+            # Calculate the linear combination of the error bit columns in the parity-check matrix.
+            error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
+            for i in error:
+                error_syn ^= self.code.parity_check_matrix.T[i]
+
+            for i in error:
+                flip_bit_syndromes[i].append(np_array_to_value(error_syn))
+
+        # Calculate which bits to flip to correct the error(s)
+        for bit, syndromes in enumerate(flip_bit_syndromes):
+            flip = reduce(
+                lambda a, b: a | b,
+                (self.syndrome == syndrome for syndrome in syndromes),
+                C(False)
+            )
+            m.d.comb += self.flips[bit].eq(flip)
+
+        return m
+
+    def ports(self) -> List[Signal]:
+        """List of module signals externally available"""
+        return [self.syndrome, self.flips]
+
+
+class GenericErrorCalculator(Elaboratable):
+    """
+    Generic implementation of an error calculator for a decoder module.
+
+    This class provides the calculations required to determine if an error, or an uncorrectable error occurred. The
+    ``error`` signal will indicate that an error has occurred by checking if the syndrome is non-zero. The
+    ``uncorrectable_error`` signal will indicate if the detected error is uncorrectable by checking if no flips were
+    applied.
+
+    This implementation is rather naive, as it has to check that all flips are zero. For many error correction codes
+    there might be a simpler way to detect whether an uncorrectable error has occurred. In that case the error
+    correction code can override the ``error_calculator`` method on ``GenericCode`` and return a custom
+    implementation for the error calculator.
+    """
+
+    def __init__(self, code: GenericCode):
+        self.code = code
+
+        self.syndrome = Signal(unsigned(code.parity_bits))
+        """Input of the error correction syndrome"""
+        self.flips = Signal(unsigned(code.total_bits))
+        """Input of the bits to flip"""
+
+        self.error = Signal()
+        """Output signalling the occurrence of an error"""
+        self.uncorrectable_error = Signal()
+        """Output signalling the occurrence of an uncorrectable error"""
+
+    def elaborate(self, platform):
+        """Elaborate the module implementation"""
+        m = Module()
+        m.d.comb += [
+            self.error.eq(self.syndrome.any()),
+            self.uncorrectable_error.eq(self.error & (self.flips == 0)),
+        ]
+        return m
+
+    def ports(self) -> List[Signal]:
+        """List of module signals externally available"""
+        return [self.syndrome, self.flips, self.error, self.uncorrectable_error]
