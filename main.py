@@ -1,16 +1,17 @@
+import numpy as np
 from nmigen import *
 from nmigen.cli import main
 from nmigen.asserts import Assert
 
 from functools import reduce
 
-from generator.error_correction import ExtendedHammingCode, HammingCode, ParityCode, IdentityCode
+from generator.error_correction import HsiaoCode, ExtendedHammingCode, HammingCode, ParityCode, IdentityCode
 
 
 class TestTop(Elaboratable):
     def __init__(self, data_bits):
         self.data_bits = data_bits
-        self.code = ExtendedHammingCode(data_bits=data_bits)
+        self.code = HsiaoCode(data_bits=data_bits)
 
         self.write_data = Signal(unsigned(self.code.total_bits))
         self.read_data = Signal(unsigned(self.code.total_bits))
@@ -24,7 +25,7 @@ class TestTop(Elaboratable):
     def elaborate(self, platform):
         m = Module()
 
-        self.code.generate_matrices()
+        self.code.generate_matrices(timeout=30.0)
 
         m.submodules.encoder = encoder = self.code.encoder()
         m.submodules.decoder = decoder = self.code.decoder()
@@ -84,7 +85,8 @@ class TestTop(Elaboratable):
 
 
 if __name__ == "__main__":
-    top = TestTop(data_bits=8)
+    np.set_printoptions(linewidth=200)
+    top = TestTop(data_bits=32)
     platform = None
     # platform = "formal"
     main(design=top, platform=platform, name="top", ports=top.ports())
