@@ -1,3 +1,4 @@
+import itertools
 from typing import Optional
 
 import numpy as np
@@ -18,14 +19,10 @@ class HammingCode(GenericCode):
     def __init__(self, data_bits: int):
         # Determine the number of parity bits required for the specified number of data bits
         parity_bits = 0
-        i = 1
-        data_bits_realized = 0
-        while data_bits_realized < data_bits:
-            if i & (i - 1):
-                data_bits_realized += 1
-            else:
-                parity_bits += 1
-            i += 1
+        for m in itertools.count():
+            if 2 ** m - m - 1 >= data_bits:
+                parity_bits = m
+                break
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
