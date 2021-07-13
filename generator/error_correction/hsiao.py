@@ -5,8 +5,9 @@ from collections import Counter
 from typing import Optional
 
 import numpy as np
+from nmigen import *
 
-from . import GenericCode
+from . import GenericCode, GenericErrorCalculator
 from .matrix_util import generator_matrix_from_systematic
 
 
@@ -96,3 +97,25 @@ class HsiaoCode(GenericCode):
         # Append all single bit errors to the correctable list
         for i in range(self.total_bits):
             self.correctable_errors.append((i,))
+
+    def error_calculator(self) -> "HsiaoErrorCalculator":
+        return HsiaoErrorCalculator(self)
+
+
+class HsiaoErrorCalculator(GenericErrorCalculator):
+    """
+    Implementation of the error calculation for Hsiao codes.
+
+    This implementation still calculates the occurrence of an error by check for a non-zero syndrome. However,
+    uncorrectable errors can be detected by simply checking if there was an error, and checking that the syndrome is
+    of even weight.
+    """
+
+    def elaborate(self, platform):
+        """Elaborate the module implementation"""
+        m = Module()
+        m.d.comb += [
+            self.error.eq(self.syndrome != 0),
+            self.uncorrectable_error.eq(self.error & (self.syndrome.xor() == 0)),
+        ]
+        return m
