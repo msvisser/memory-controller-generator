@@ -309,7 +309,7 @@ class GenericErrorCalculator(Elaboratable):
         """Elaborate the module implementation"""
         m = Module()
         m.d.comb += [
-            self.error.eq(self.syndrome.any()),
+            self.error.eq(self.syndrome != 0),
             self.uncorrectable_error.eq(self.error & (self.flips == 0)),
         ]
         return m
