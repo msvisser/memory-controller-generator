@@ -58,27 +58,34 @@ class HsiaoCode(GenericCode):
         # Create an iterator over all possible options
         flexible_column_combinations = itertools.combinations(flexible_columns, columns_needed)
 
-        lowest_diff = None
-        lowest_candidate = None
+        # If no timeout is set, assume a timeout of 24 hours
+        if timeout is None:
+            timeout = 3600 * 24
         timeout_time = time.time() + timeout
+
+        # Initialise the lowest maximum row weight as the number of bits, as this is the maximum weight of a row
+        lowest_max_row_weight = self.total_bits
+        lowest_candidate = None
+
         # Search for the candidate with the lowest difference in row weight
         for candidate_columns in flexible_column_combinations:
             # Build the complete column list
-            total = fixed_columns + list(candidate_columns)
+            candidate = fixed_columns + list(candidate_columns)
             # Count the number of ones in each row
-            c = Counter(itertools.chain(*total))
+            c = Counter(itertools.chain(*candidate))
 
-            # Calculate the average number of ones in each row
-            average = sum(c.values()) / self.parity_bits
-            # Determine the absolute difference of each row from the average
-            difference = sum(abs(average - value) for value in c.values())
+            # Calculate the minimum and maximum weight of the rows
+            max_row_weight = max(c.values())
+            min_row_weight = min(c.values())
 
-            # If this candidate is the best so far, store it
-            if lowest_diff is None or difference < lowest_diff:
-                lowest_diff = difference
-                lowest_candidate = total
-                if difference == 0:
-                    # If the current difference is zero, the rows are completely balanced, so this is a perfect solution
+            # If this candidate has the lowest maximum row weight, store it
+            if max_row_weight < lowest_max_row_weight:
+                lowest_max_row_weight = max_row_weight
+                lowest_candidate = candidate
+
+                # If the difference between the lowest weight and highest weight rows is one or zero, the rows of the
+                # matrix are completely balanced
+                if max_row_weight - min_row_weight <= 1:
                     break
 
             if time.time() > timeout_time:
