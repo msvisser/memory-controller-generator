@@ -25,7 +25,7 @@ class HsiaoCode(GenericCode):
     Codes", IBM Journal of Research & Development, 1970.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         # Determine the number of parity bits required for the specified number of data bits
         parity_bits = 0
         for m in itertools.count():
@@ -35,7 +35,7 @@ class HsiaoCode(GenericCode):
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         # Find all columns which are always used
         columns_needed = self.data_bits
         fixed_columns = []
@@ -120,7 +120,7 @@ class HsiaoErrorCalculator(GenericErrorCalculator):
     of even weight.
     """
 
-    def elaborate(self, platform):
+    def elaborate(self, platform) -> Module:
         """Elaborate the module implementation"""
         m = Module()
         m.d.comb += [
@@ -146,7 +146,7 @@ class HsiaoConstructedCode(GenericCode):
     Matrices", 2013, https://arxiv.org/pdf/0803.1217.pdf.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         # Calculate the number of required parity bits
         parity_bits = 0
         while parity_bits < 1 + math.log2(data_bits + parity_bits):
@@ -154,7 +154,7 @@ class HsiaoConstructedCode(GenericCode):
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         # Calculate the weight of the highest weight columns
         max_weight = 1
         prev_total = 0

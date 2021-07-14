@@ -113,7 +113,13 @@ def generator_matrix_from_parity_check_matrix(parity_check_matrix: NDArray) -> N
     return generator_matrix
 
 
-def np_array_to_value(array: np.array):
+def np_array_to_value(array: NDArray) -> int:
+    """
+    Convert binary numpy vector to value.
+
+    :param array: numpy vector
+    :return: value as int
+    """
     (size,) = array.shape
     return sum(
         (1 << i) if array[i] else 0

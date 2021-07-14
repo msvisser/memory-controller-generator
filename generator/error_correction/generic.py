@@ -20,7 +20,7 @@ class GenericCode(abc.ABC):
     ``GenericEncoder`` and ``GenericDecoder``.
     """
 
-    def __init__(self, data_bits: int, parity_bits: int):
+    def __init__(self, data_bits: int, parity_bits: int) -> None:
         self.data_bits = data_bits
         self.parity_bits = parity_bits
 
@@ -108,7 +108,7 @@ class GenericEncoder(Elaboratable):
     done by calculating the exclusive-or result of all data bits for which there is a one in the column.
     """
 
-    def __init__(self, code: GenericCode):
+    def __init__(self, code: GenericCode) -> None:
         self.code = code
 
         self.data_in = Signal(unsigned(code.data_bits))
@@ -150,7 +150,7 @@ class GenericDecoder(Elaboratable):
     output. Using the corrected encoded output, the data output can be calculated.
     """
 
-    def __init__(self, code: GenericCode):
+    def __init__(self, code: GenericCode) -> None:
         self.code = code
 
         self.enc_in = Signal(unsigned(code.total_bits))
@@ -238,7 +238,7 @@ class GenericFlipCalculator(Elaboratable):
     override the ``flip_calculator`` method of ``GenericCode`` to return their own implementation.
     """
 
-    def __init__(self, code: GenericCode):
+    def __init__(self, code: GenericCode) -> None:
         self.code = code
 
         self.syndrome = Signal(unsigned(code.parity_bits))
@@ -292,7 +292,7 @@ class GenericErrorCalculator(Elaboratable):
     implementation for the error calculator.
     """
 
-    def __init__(self, code: GenericCode):
+    def __init__(self, code: GenericCode) -> None:
         self.code = code
 
         self.syndrome = Signal(unsigned(code.parity_bits))
@@ -305,7 +305,7 @@ class GenericErrorCalculator(Elaboratable):
         self.uncorrectable_error = Signal()
         """Output signalling the occurrence of an uncorrectable error"""
 
-    def elaborate(self, platform):
+    def elaborate(self, platform) -> Module:
         """Elaborate the module implementation"""
         m = Module()
         m.d.comb += [

@@ -17,7 +17,7 @@ class HammingCode(GenericCode):
     able to detect and correct a single error.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         # Determine the number of parity bits required for the specified number of data bits
         parity_bits = 0
         for m in itertools.count():
@@ -27,7 +27,7 @@ class HammingCode(GenericCode):
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
 
         # Set the columns of the parity-check matrix to increasing binary values
@@ -53,13 +53,13 @@ class ExtendedHammingCode(HammingCode):
     detect double bit errors.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         # Inherit the number of parity bits from the Hamming code, but increment by one, as we are adding a single
         # over-all parity check
         super().__init__(data_bits=data_bits)
         self.parity_bits += 1
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
 
         # Set the columns of the parity-check matrix to increasing binary values
@@ -90,7 +90,7 @@ class ExtendedHammingErrorCalculator(GenericErrorCalculator):
     uncorrectable errors can be detected by simply checking if there was an error, and the last syndrome bit is zero.
     """
 
-    def elaborate(self, platform):
+    def elaborate(self, platform) -> Module:
         """Elaborate the module implementation"""
         m = Module()
         m.d.comb += [

@@ -13,9 +13,9 @@ class IdentityCode(GenericCode):
     the input data to the encoded output. When decoding, there is no check to verify the correctness of the data.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         super().__init__(data_bits=data_bits, parity_bits=0)
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.generator_matrix = np.identity(self.data_bits, dtype=np.int)
         self.parity_check_matrix = np.zeros((0, 0), dtype=np.int)

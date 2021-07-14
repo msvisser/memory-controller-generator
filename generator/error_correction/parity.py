@@ -14,9 +14,9 @@ class ParityCode(GenericCode):
     data bits.
     """
 
-    def __init__(self, data_bits: int):
+    def __init__(self, data_bits: int) -> None:
         super().__init__(data_bits=data_bits, parity_bits=1)
 
-    def generate_matrices(self, timeout: Optional[float] = None):
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.parity_check_matrix = np.ones((1, self.total_bits), dtype=np.int)
         self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
