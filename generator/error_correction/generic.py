@@ -251,7 +251,7 @@ class GenericFlipCalculator(Elaboratable):
         m = Module()
 
         # Calculate which syndromes cause a bit to flip
-        flip_bit_syndromes = [[] for _ in range(self.code.total_bits)]
+        flip_bit_syndromes: List[List[int]] = [[] for _ in range(self.code.total_bits)]
         for error in self.code.correctable_errors:
             # Calculate the linear combination of the error bit columns in the parity-check matrix.
             error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
