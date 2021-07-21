@@ -130,7 +130,7 @@ class HsiaoErrorCalculator(GenericErrorCalculator):
         return m
 
 
-class HsiaoConstructedCode(GenericCode):
+class HsiaoConstructedCode(HsiaoCode):
     """
     Implementation of the Hsiao code (SEC-DED) using a construction algorithm.
 
@@ -138,21 +138,9 @@ class HsiaoConstructedCode(GenericCode):
     matrix without doing any searching. Instead, the matrix is constructed using the recursive ``delta`` function,
     whose documentation contains more information about the algorithm.
 
-    This implementation is very fast in constructing the parity-check matrix, however it seems to produce slightly
-    worse results when synthesized. However, this algorithm still produces valid Hsiao codes, so these worse results
-    are most likely a coincidence.
-
     The definition of this algorithm can be found in: L. Chen, "Hsiao-Code Check Matrices and Recursively Balanced
     Matrices", 2013, https://arxiv.org/pdf/0803.1217.pdf.
     """
-
-    def __init__(self, data_bits: int) -> None:
-        # Calculate the number of required parity bits
-        parity_bits = 0
-        while parity_bits < 1 + math.log2(data_bits + parity_bits):
-            parity_bits += 1
-
-        super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         # Calculate the weight of the highest weight columns
