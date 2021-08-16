@@ -1,0 +1,16 @@
+[tasks]
+bmc
+
+[options]
+mode bmc
+depth 1
+
+[engines]
+smtbmc boolector
+
+[script]
+read_verilog -sv test.v
+prep -top top
+
+[files]
+test.v
