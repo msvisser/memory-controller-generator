@@ -27,6 +27,7 @@ class GenericCode(abc.ABC):
         self.generator_matrix: Optional[NDArray] = None
         self.parity_check_matrix: Optional[NDArray] = None
         self.correctable_errors: List[Tuple] = []
+        self.detectable_errors: List[Tuple] = []
 
     @property
     def total_bits(self) -> int:

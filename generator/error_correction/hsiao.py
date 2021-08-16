@@ -35,6 +35,15 @@ class HsiaoCode(GenericCode):
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
+        # All single bit errors are correctable
+        for i in range(self.total_bits):
+            self.correctable_errors.append((i,))
+
+        # All two bit errors are detectable
+        for i in range(self.total_bits):
+            for j in range(i + 1, self.total_bits):
+                self.detectable_errors.append((i, j))
+
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         # Find all columns which are always used
         columns_needed = self.data_bits
@@ -103,10 +112,6 @@ class HsiaoCode(GenericCode):
         # in systematic form, so no extra work is required
         self.generator_matrix = generator_matrix_from_systematic(self.parity_check_matrix)
 
-        # Append all single bit errors to the correctable list
-        for i in range(self.total_bits):
-            self.correctable_errors.append((i,))
-
     def error_calculator(self) -> "HsiaoErrorCalculator":
         return HsiaoErrorCalculator(self)
 
@@ -170,10 +175,6 @@ class HsiaoConstructedCode(HsiaoCode):
 
         # Calculate the generator matrix from the parity-check matrix
         self.generator_matrix = generator_matrix_from_systematic(self.parity_check_matrix)
-
-        # Append all single bit errors to the correctable list
-        for i in range(self.total_bits):
-            self.correctable_errors.append((i,))
 
     @staticmethod
     def delta(rows: int, weight: int, columns: int) -> NDArray:

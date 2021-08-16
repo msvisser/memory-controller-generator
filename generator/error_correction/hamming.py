@@ -27,6 +27,10 @@ class HammingCode(GenericCode):
 
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
+        # Add the list of correctable errors
+        for i in range(self.total_bits):
+            self.correctable_errors.append((i,))
+
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
 
@@ -37,10 +41,6 @@ class HammingCode(GenericCode):
 
         # Create the generator matrix from the parity-check matrix
         self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
-
-        # Add the list of correctable errors
-        for i in range(self.total_bits):
-            self.correctable_errors.append((i,))
 
 
 class ExtendedHammingCode(HammingCode):
@@ -59,6 +59,11 @@ class ExtendedHammingCode(HammingCode):
         super().__init__(data_bits=data_bits)
         self.parity_bits += 1
 
+        # Add the list of detectable errors, correctable errors are inherited
+        for i in range(self.total_bits):
+            for j in range(i + 1, self.total_bits):
+                self.detectable_errors.append((i, j))
+
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
 
@@ -73,10 +78,6 @@ class ExtendedHammingCode(HammingCode):
 
         # Create the generator matrix from the parity-check matrix
         self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
-
-        # Add the list of correctable errors
-        for i in range(self.total_bits):
-            self.correctable_errors.append((i,))
 
     def error_calculator(self) -> "ExtendedHammingErrorCalculator":
         return ExtendedHammingErrorCalculator(self)
