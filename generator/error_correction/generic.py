@@ -1,5 +1,4 @@
 import abc
-from functools import reduce
 from typing import Optional, List, Tuple
 
 import numpy as np
@@ -7,6 +6,7 @@ from nmigen import *
 from numpy.typing import NDArray
 
 from .matrix_util import np_array_to_value
+from ..util import or_reduce, xor_reduce
 
 
 class GenericCode(abc.ABC):
@@ -127,7 +127,7 @@ class GenericEncoder(Elaboratable):
                 if select:
                     input_parts.append(self.data_in[i])
 
-            m.d.comb += self.enc_out[col_idx].eq(reduce(lambda a, b: a ^ b, input_parts))
+            m.d.comb += self.enc_out[col_idx].eq(xor_reduce(input_parts))
 
         return m
 
@@ -180,7 +180,7 @@ class GenericDecoder(Elaboratable):
                     if select:
                         input_parts.append(self.enc_in[i])
 
-                m.d.comb += syndrome_signal[row_idx].eq(reduce(lambda a, b: a ^ b, input_parts, 0))
+                m.d.comb += syndrome_signal[row_idx].eq(xor_reduce(input_parts))
 
             # Send the calculated syndrome to the flips calculator
             m.d.comb += flip_calculator.syndrome.eq(syndrome_signal)
@@ -263,11 +263,7 @@ class GenericFlipCalculator(Elaboratable):
 
         # Calculate which bits to flip to correct the error(s)
         for bit, syndromes in enumerate(flip_bit_syndromes):
-            flip = reduce(
-                lambda a, b: a | b,
-                (self.syndrome == syndrome for syndrome in syndromes),
-                C(False)
-            )
+            flip = or_reduce(self.syndrome == syndrome for syndrome in syndromes)
             m.d.comb += self.flips[bit].eq(flip)
 
         return m
