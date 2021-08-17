@@ -2,14 +2,19 @@
 BITS=32
 
 function run_test {
+  echo -n "[ .... ] $1"
+
   python ../../main.py -c $1 -b ${BITS} -p formal generate > test.v 2> /dev/null
   sby -f test.sby > /dev/null
 
   if [ $? -eq 0 ]; then
-    echo -e "[\e[0;32mPASSED\e[0m] $1"
+    echo -e "\r[\e[0;32mPASSED\e[0m] $1"
   else
-    echo -e "[\e[0;31mFAILED\e[0m] $1"
+    echo -e "\r[\e[0;31mFAILED\e[0m] $1"
+    exit 1
   fi
+
+  rm test.v
 }
 
 run_test IdentityCode
