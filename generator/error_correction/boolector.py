@@ -46,7 +46,7 @@ class BoolectorCode(GenericCode):
     def __init__(self, data_bits, parity_bits):
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 
-        self.boolector = None
+        self.boolector: Boolector = None
         self.data_vars = []
         self.parity_vars = []
         self.all_vars = []
