@@ -1,4 +1,5 @@
 import itertools
+import math
 from typing import List
 
 from . import BoolectorCode
@@ -45,4 +46,24 @@ class DuttaToubaCode(BoolectorCode):
             b.Assert(b.Redxor(self.all_vars[i]) == 1)
 
     def optimization_goals(self) -> List[BoolectorOptimizationGoal]:
-        return self.common_optimization_goals()
+        goals = self.common_optimization_goals()
+
+        # Calculate the minimum total bitcount
+        total_bits_lowerbound = 0
+        columns_needed = self.total_bits
+        for i in itertools.count(start=1, step=2):
+            possible_columns = math.comb(self.parity_bits, i)
+            if possible_columns < columns_needed:
+                columns_needed -= possible_columns
+                total_bits_lowerbound += i * possible_columns
+            else:
+                total_bits_lowerbound += i * columns_needed
+                break
+
+        per_row_lowerbound = (total_bits_lowerbound + self.parity_bits - 1) // self.parity_bits
+
+        # FIXME: This is a gigantic hack
+        goals[0].lower_bound = per_row_lowerbound
+        goals[1].lower_bound = total_bits_lowerbound
+
+        return goals

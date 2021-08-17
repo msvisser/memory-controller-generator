@@ -38,7 +38,8 @@ class BoolectorOptimizationGoal:
     debugging purposes.
     """
     expression: BoolectorNode
-    initial_value: int
+    upper_bound: int
+    lower_bound: int = 0
     description: str = ""
 
 
@@ -122,11 +123,12 @@ class BoolectorCode(GenericCode):
             return None
 
         for opt_goal in optimisation_goals:
-            logging.debug(f"Starting optimisation of {opt_goal.description} with {opt_goal.initial_value}")
+            logging.debug(f"Starting optimisation of {opt_goal.description} " +
+                          f"from {opt_goal.upper_bound} down to {opt_goal.lower_bound}")
             opt_best = None
 
             # Assume that the optimization goal can be satisfied
-            b.Assume(opt_goal.expression <= opt_goal.initial_value)
+            b.Assume(opt_goal.expression <= opt_goal.upper_bound)
 
             while True:
                 # Attempt to satisfy the optimization goal
@@ -136,10 +138,13 @@ class BoolectorCode(GenericCode):
                     best_model = self._parity_check_matrix_from_model()
 
                     opt_best = int(opt_goal.expression.assignment, 2)
-                    logging.debug(f"Found assignment of {opt_best}")
+                    logging.debug(f"Found assignment with {opt_best}")
 
                     # Attempt to lower the goal for optimization
                     b.Fixate_assumptions()
+                    if opt_best == opt_goal.lower_bound:
+                        logging.debug("Lower bound reached")
+                        break
                     b.Assume(opt_goal.expression < opt_best)
                 elif result == b.UNSAT:
                     # Optimization of this goal cannot be improved
@@ -217,8 +222,16 @@ class BoolectorCode(GenericCode):
 
         # Return the optimization goals
         return [
-            BoolectorOptimizationGoal(bitcounts_max, self.total_bits, "maximum bits per row"),
-            BoolectorOptimizationGoal(total_bits, self.parity_bits * self.total_bits, "overall total bits"),
+            BoolectorOptimizationGoal(
+                expression=bitcounts_max,
+                upper_bound=self.total_bits,
+                description="maximum bits per row"
+            ),
+            BoolectorOptimizationGoal(
+                expression=total_bits,
+                upper_bound=self.parity_bits * self.total_bits,
+                description="overall total bits"
+            ),
         ]
 
     def assert_all_unique(self, expressions: Sequence[BoolectorNode]) -> None:
