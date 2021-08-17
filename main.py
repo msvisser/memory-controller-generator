@@ -51,6 +51,8 @@ class TestTop(Elaboratable):
             self.write_data.eq(encoder.enc_out),
             decoder.enc_in.eq(self.read_data),
             self.data_out.eq(decoder.data_out),
+            self.error.eq(decoder.error),
+            self.uncorrectable_error.eq(decoder.uncorrectable_error),
         ]
 
         if platform == "formal":
@@ -99,11 +101,6 @@ class TestTop(Elaboratable):
                     Assert(decoder.error),
                     Assert(decoder.uncorrectable_error),
                 ]
-        else:
-            m.d.comb += [
-                self.error.eq(decoder.error),
-                self.uncorrectable_error.eq(decoder.uncorrectable_error),
-            ]
 
         return m
 
