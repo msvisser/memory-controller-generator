@@ -4,3 +4,4 @@ from .identity import IdentityCode
 from .parity import ParityCode
 from .hamming import HammingCode, ExtendedHammingCode
 from .hsiao import HsiaoCode, HsiaoConstructedCode
+from .boolector import BoolectorCode

@@ -3,5 +3,6 @@ logging==0.4.9.6
 MarkupSafe==2.0.1
 nmigen==0.2
 numpy==1.21.0
+PyBoolector==3.2.2.20210617.2
 pyvcd==0.1.7
 six==1.16.0
