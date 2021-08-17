@@ -18,3 +18,4 @@ run_test HammingCode
 run_test ExtendedHammingCode
 run_test HsiaoCode
 run_test HsiaoConstructedCode
+run_test DuttaToubaCode
