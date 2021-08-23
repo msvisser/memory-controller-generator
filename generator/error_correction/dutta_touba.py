@@ -1,6 +1,9 @@
 import itertools
+import logging
 import math
-from typing import List
+from typing import List, Optional
+
+import numpy as np
 
 from . import BoolectorCode
 from .boolector import BoolectorOptimizationGoal
@@ -24,7 +27,37 @@ class DuttaToubaCode(BoolectorCode):
         for i in range(1, self.total_bits):
             self.correctable_errors.append((i - 1, i))
 
-        # TODO: Not all random 2-bit errors are detectable, but some are, so they should probably be marked.
+
+    def generate_matrices(self, timeout: Optional[float] = None) -> None:
+        super().generate_matrices(timeout=timeout)
+
+        # Not all random 2-bit errors are detectable, but some are, so they are calculated here for use in the formal
+        # verification.
+
+        # Calculate all correctable syndromes
+        correctable_syndromes = []
+        for column in self.parity_check_matrix.T:
+            correctable_syndromes.append(column)
+        for i in range(1, self.total_bits):
+            correctable_syndromes.append(self.parity_check_matrix[:, i - 1] ^ self.parity_check_matrix[:, i])
+
+        # Check for overlapping syndromes in all 2-bit random errors
+        overlapping_count = 0
+        for i in range(self.total_bits):
+            for j in range(i + 2, self.total_bits):
+                result = self.parity_check_matrix[:, i] ^ self.parity_check_matrix[:, j]
+
+                for column in correctable_syndromes:
+                    if np.array_equal(column, result):
+                        overlapping_count += 1
+                        break
+                else:
+                    self.detectable_errors.append((i, j))
+
+        # Show information message containing the percentage of miscorrected syndromes
+        total = sum(range(1, self.total_bits - 1))
+        percentage = 100 * overlapping_count / total
+        logging.info(f"Miscorrected syndromes: {overlapping_count}/{total} ({percentage:.2f}%)")
 
     def conditions(self) -> None:
         # Collect all correctable syndromes
