@@ -7,8 +7,8 @@ import numpy as np
 from nmigen import *
 from numpy.typing import NDArray
 
-from .matrix_util import np_array_to_value, generator_matrix_from_parity_check_matrix
-from ..util import or_reduce, xor_reduce
+from ..util.matrix import np_array_to_value, generator_matrix_from_parity_check_matrix
+from ..util.reduce import or_reduce, xor_reduce
 
 
 class GenericCode(abc.ABC):

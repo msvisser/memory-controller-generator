@@ -7,7 +7,7 @@ from nmigen.asserts import Assert
 from nmigen.cli import main_parser, main_runner
 
 import generator.error_correction
-from generator.util import or_reduce
+from generator.util.reduce import or_reduce
 
 
 class TestTop(Elaboratable):

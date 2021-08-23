@@ -5,7 +5,7 @@ import numpy as np
 from nmigen import *
 
 from . import GenericCode, GenericErrorCalculator
-from .matrix_util import generator_matrix_from_parity_check_matrix
+from ..util.matrix import generator_matrix_from_parity_check_matrix
 
 
 class HammingCode(GenericCode):

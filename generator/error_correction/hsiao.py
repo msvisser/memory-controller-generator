@@ -10,7 +10,7 @@ from nmigen import *
 from numpy.typing import NDArray
 
 from . import GenericCode, GenericErrorCalculator
-from .matrix_util import generator_matrix_from_systematic
+from ..util.matrix import generator_matrix_from_systematic
 
 
 class HsiaoCode(GenericCode):

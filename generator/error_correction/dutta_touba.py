@@ -9,7 +9,7 @@ from pyboolector import BoolectorNode
 
 from . import BoolectorCode
 from .boolector import BoolectorOptimizationGoal
-from ..util import or_reduce
+from ..util.reduce import or_reduce
 
 
 class DuttaToubaCode(BoolectorCode):

@@ -12,7 +12,7 @@ from nmigen.utils import bits_for
 from pyboolector import Boolector, BoolectorNode
 
 from . import GenericCode
-from .matrix_util import generator_matrix_from_parity_check_matrix
+from ..util.matrix import generator_matrix_from_parity_check_matrix
 
 sigint_tripped = False
 """Global flag indicating if SIGINT was raised"""

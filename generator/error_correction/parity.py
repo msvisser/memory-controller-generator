@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 
 from . import GenericCode
-from .matrix_util import generator_matrix_from_parity_check_matrix
+from ..util.matrix import generator_matrix_from_parity_check_matrix
 
 
 class ParityCode(GenericCode):
