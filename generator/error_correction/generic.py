@@ -1,12 +1,13 @@
 import abc
 import logging
+from pathlib import Path
 from typing import Optional, List, Tuple
 
 import numpy as np
 from nmigen import *
 from numpy.typing import NDArray
 
-from .matrix_util import np_array_to_value
+from .matrix_util import np_array_to_value, generator_matrix_from_parity_check_matrix
 from ..util import or_reduce, xor_reduce
 
 
@@ -52,6 +53,41 @@ class GenericCode(abc.ABC):
         :return: None
         """
         return
+
+    def generate_matrices_cached(self, timeout: Optional[float] = None, force_rebuild: bool = False) -> None:
+        """
+        Generate the parity-check and generator matrices for this error correction code, with possible caching.
+
+        This method provides the same functionality as ``generate_matrices`` with the additional support for caching
+        the generated matrices to allow for faster runtime. If a cached version of the parity-check matrix with the
+        specified number of data bits exist, it will be automatically loaded and the expensive computation of the
+        parity-check matrix will be skipped. Otherwise, the parity-check matrix will be generated like normal using
+        ``generate_matrices``. This matrix will then be automatically cached for the next run.
+
+        If the ``force_rebuild`` option is enabled, the parity-check matrix will always be calculated from scratch
+        disregarding the cached version, which might be available.
+
+        :param timeout:
+        :param force_rebuild:
+        :return:
+        """
+        # Determine the file name and path
+        file_name = f"{self.__class__.__name__}_{self.data_bits}.txt"
+        file_path = Path(f"~/.cache/memory-controller-generator/{file_name}").expanduser()
+
+        # Check if the matrix should be generated or loaded from file
+        if not force_rebuild and file_path.exists():
+            logging.info(f"Loading parity-check matrix from '{file_path}'")
+            # Load the parity-check matrix from the file
+            self.parity_check_matrix = np.loadtxt(file_path, dtype=int)
+            # Calculate the corresponding generator matrix from the parity-check matrix
+            self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
+        else:
+            self.generate_matrices(timeout=timeout)
+            # Make sure the parent folders exist
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            # Save the parity-check matrix to the file
+            np.savetxt(file_path, self.parity_check_matrix, fmt="%d")
 
     def encoder(self) -> "GenericEncoder":
         """
