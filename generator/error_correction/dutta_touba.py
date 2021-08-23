@@ -79,24 +79,29 @@ class DuttaToubaCode(BoolectorCode):
             b.Assert(b.Redxor(self.all_vars[i]) == 1)
 
     def optimization_goals(self) -> List[BoolectorOptimizationGoal]:
-        goals = self.common_optimization_goals()
-
         # Calculate the minimum total bitcount
-        total_bits_lowerbound = 0
+        total_ones_lowerbound = 0
         columns_needed = self.total_bits
         for i in itertools.count(start=1, step=2):
             possible_columns = math.comb(self.parity_bits, i)
             if possible_columns < columns_needed:
                 columns_needed -= possible_columns
-                total_bits_lowerbound += i * possible_columns
+                total_ones_lowerbound += i * possible_columns
             else:
-                total_bits_lowerbound += i * columns_needed
+                total_ones_lowerbound += i * columns_needed
                 break
 
-        per_row_lowerbound = (total_bits_lowerbound + self.parity_bits - 1) // self.parity_bits
+        maximum_ones_per_row_lowerbound = (total_ones_lowerbound + self.parity_bits - 1) // self.parity_bits
 
-        # FIXME: This is a gigantic hack
-        goals[0].lower_bound = per_row_lowerbound
-        goals[1].lower_bound = total_bits_lowerbound
+        # Generate the common goals
+        maximum_ones_per_row_goal = self.maximum_ones_per_row_optimization_goal()
+        total_ones_goal = self.total_ones_optimization_goal()
 
-        return goals
+        # Assign the lower bounds
+        maximum_ones_per_row_goal.lower_bound = maximum_ones_per_row_lowerbound
+        total_ones_goal.lower_bound = total_ones_lowerbound
+
+        return [
+            maximum_ones_per_row_goal,
+            total_ones_goal,
+        ]
