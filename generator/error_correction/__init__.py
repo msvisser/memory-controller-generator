@@ -6,3 +6,4 @@ from .hamming import HammingCode, ExtendedHammingCode
 from .hsiao import HsiaoCode, HsiaoConstructedCode
 from .boolector import BoolectorCode
 from .dutta_touba import DuttaToubaCode
+from .she_li import SheLiCode
