@@ -134,7 +134,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level, format=log_format)
 
     # Create top module
-    logging.info(f"Selected code: {args.code_name}, with {args.data_bits} bits")
     top = TestTop(data_bits=args.data_bits, code_name=args.code_name, timeout=args.timeout)
 
     # Set the platform

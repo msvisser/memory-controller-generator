@@ -1,4 +1,5 @@
 import abc
+import logging
 from typing import Optional, List, Tuple
 
 import numpy as np
@@ -28,6 +29,8 @@ class GenericCode(abc.ABC):
         self.parity_check_matrix: Optional[NDArray] = None
         self.correctable_errors: List[Tuple] = []
         self.detectable_errors: List[Tuple] = []
+
+        logging.info(f"Selected {self.__class__.__name__}({data_bits},{parity_bits},{self.total_bits})")
 
     @property
     def total_bits(self) -> int:
