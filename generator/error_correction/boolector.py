@@ -52,6 +52,9 @@ class BoolectorCode(GenericCode):
         self.parity_vars = []
         self.all_vars = []
 
+        self.row_popcount_max = None
+        self.total_popcount = None
+
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         """
         Generate the parity-check and generator matrices for this error correction code.
@@ -191,6 +194,21 @@ class BoolectorCode(GenericCode):
 
         :return: List of optimization goals
         """
+        return [
+            self.maximum_ones_per_row_optimization_goal(),
+            self.total_ones_optimization_goal(),
+        ]
+
+    def _generate_popcount_scaffolding(self) -> None:
+        """
+        Build the Boolector nodes representing the maximum row popcount and total popcount.
+
+        :return: None
+        """
+        # If these nodes already exist do not recreate them
+        if self.row_popcount_max is not None and self.total_popcount is not None:
+            return
+
         b = self.boolector
 
         # Calculate the maximum number of bits needed to count all ones in the matrix
@@ -216,23 +234,45 @@ class BoolectorCode(GenericCode):
             return b.Cond(condition, p, q)
 
         # Calculate the maximum number of bits set per row
-        bitcounts_max = reduce(boolector_max, bits_set_in_row)
+        self.row_popcount_max = reduce(boolector_max, bits_set_in_row)
         # Calculate the total number of bits set
-        total_bits = sum(bits_set_in_row)
+        self.total_popcount = sum(bits_set_in_row)
 
-        # Return the optimization goals
-        return [
-            BoolectorOptimizationGoal(
-                expression=bitcounts_max,
-                upper_bound=self.total_bits,
-                description="maximum bits per row"
-            ),
-            BoolectorOptimizationGoal(
-                expression=total_bits,
-                upper_bound=self.parity_bits * self.total_bits,
-                description="overall total bits"
-            ),
-        ]
+    def maximum_ones_per_row_optimization_goal(self) -> BoolectorOptimizationGoal:
+        """
+        Get the optimization goal for the maximum number of ones per row.
+
+        This optimization goal uses the ``self.row_popcount_max`` Boolector node to optimize the maximum number of
+        ones per row. The maximum number of ones per row is always upper bounded by ``self.data_bits + 1`` as all the
+        data bit columns could contain a one in this row, but the parity-check columns always contain only a single
+        one per row.
+
+        :return: BoolectorOptimizationGoal for maximum ones per row
+        """
+        self._generate_popcount_scaffolding()
+        return BoolectorOptimizationGoal(
+            expression=self.row_popcount_max,
+            upper_bound=self.data_bits + 1,
+            description="maximum ones per row"
+        )
+
+    def total_ones_optimization_goal(self) -> BoolectorOptimizationGoal:
+        """
+        Get the optimization goal for the total number of ones in the matrix.
+
+        This optimization goal uses the ``self.total_popcount`` Boolector node to optimize the total number of ones
+        in the parity-check matrix. The total number of ones is always upper bounded by ``self.parity_bits * (
+        self.data_bits + 1)`` as each row is upper bounded by ``self.data_bits + 1`` and there are
+        ``self.parity_bits`` number of rows.
+
+        :return: BoolectorOptimizationGoal for total ones in matrix
+        """
+        self._generate_popcount_scaffolding()
+        return BoolectorOptimizationGoal(
+            expression=self.total_popcount,
+            upper_bound=self.parity_bits * (self.data_bits + 1),
+            description="total ones in matrix"
+        )
 
     def assert_all_unique(self, expressions: Sequence[BoolectorNode]) -> None:
         """
