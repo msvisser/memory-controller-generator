@@ -11,8 +11,9 @@ from generator.util import or_reduce
 
 
 class TestTop(Elaboratable):
-    def __init__(self, data_bits, code_name):
+    def __init__(self, data_bits, code_name, timeout):
         self.data_bits = data_bits
+        self.timeout = timeout
 
         # Dynamically select the error correction code based on the supplied name
         if not hasattr(generator.error_correction, code_name):
@@ -34,7 +35,7 @@ class TestTop(Elaboratable):
 
         # Measure the time it takes to generate the matrices for this code
         start = time.time()
-        self.code.generate_matrices(timeout=30.0)
+        self.code.generate_matrices(timeout=self.timeout)
         duration = 1000 * (time.time() - start)
         logging.info(f"Matrix generation took {duration:.2f}ms")
 
@@ -121,6 +122,7 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--bits", dest="data_bits", default=32, type=int)
     parser.add_argument("-v", "--verbose", dest="verbose", action="count", default=0)
     parser.add_argument("-p", "--platform", dest="platform", default=None)
+    parser.add_argument("-t", "--timeout", dest="timeout", default=30.0, type=float)
     args = parser.parse_args()
 
     # Set the logging level based on the verbose-ness
@@ -133,7 +135,7 @@ if __name__ == "__main__":
 
     # Create top module
     logging.info(f"Selected code: {args.code_name}, with {args.data_bits} bits")
-    top = TestTop(data_bits=args.data_bits, code_name=args.code_name)
+    top = TestTop(data_bits=args.data_bits, code_name=args.code_name, timeout=args.timeout)
 
     # Set the platform
     platform = args.platform
