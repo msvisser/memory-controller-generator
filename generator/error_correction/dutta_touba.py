@@ -4,9 +4,12 @@ import math
 from typing import List, Optional
 
 import numpy as np
+from nmigen.utils import bits_for
+from pyboolector import BoolectorNode
 
 from . import BoolectorCode
 from .boolector import BoolectorOptimizationGoal
+from ..util import or_reduce
 
 
 class DuttaToubaCode(BoolectorCode):
@@ -27,6 +30,7 @@ class DuttaToubaCode(BoolectorCode):
         for i in range(1, self.total_bits):
             self.correctable_errors.append((i - 1, i))
 
+        self.correctable_syndromes: List[BoolectorNode] = []
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         super().generate_matrices(timeout=timeout)
@@ -61,17 +65,17 @@ class DuttaToubaCode(BoolectorCode):
 
     def conditions(self) -> None:
         # Collect all correctable syndromes
-        correctable_syndromes = []
+        self.correctable_syndromes = []
 
         # All single column syndromes should be correctable
         for i in range(self.total_bits):
-            correctable_syndromes.append(self.all_vars[i])
+            self.correctable_syndromes.append(self.all_vars[i])
         # All adjacent column syndromes should be correctable
         for i in range(1, self.total_bits):
-            correctable_syndromes.append(self.all_vars[i - 1] ^ self.all_vars[i])
+            self.correctable_syndromes.append(self.all_vars[i - 1] ^ self.all_vars[i])
 
         # Assert that all correctable syndromes are unique
-        self.assert_all_unique(correctable_syndromes)
+        self.assert_all_unique(self.correctable_syndromes)
 
         # Assert that every column has an odd weight
         b = self.boolector
@@ -101,7 +105,31 @@ class DuttaToubaCode(BoolectorCode):
         maximum_ones_per_row_goal.lower_bound = maximum_ones_per_row_lowerbound
         total_ones_goal.lower_bound = total_ones_lowerbound
 
+        # Calculate the total number of possible overlapping syndromes
+        total_possible_overlapping_syndromes = sum(range(1, self.total_bits - 1))
+        bits_requried = bits_for(total_possible_overlapping_syndromes)
+
+        b = self.boolector
+        const_zero = b.Const(0, bits_requried)
+        const_one = b.Const(1, bits_requried)
+
+        # Count the number of overlapping syndromes
+        overlapping_syndromes = b.Const(0, bits_requried)
+        for i in range(self.total_bits):
+            for j in range(i + 2, self.total_bits):
+                syndrome = self.all_vars[i] ^ self.all_vars[j]
+                match = or_reduce(syndrome == corr_syn for corr_syn in self.correctable_syndromes)
+                overlapping_syndromes += b.Cond(match, const_one, const_zero)
+
+        # Minimize the number of overlapping syndromes
+        overlapping_syndromes_goal = BoolectorOptimizationGoal(
+            expression=overlapping_syndromes,
+            upper_bound=total_possible_overlapping_syndromes,
+            description="overlapping syndromes"
+        )
+
         return [
             maximum_ones_per_row_goal,
             total_ones_goal,
+            overlapping_syndromes_goal,
         ]
