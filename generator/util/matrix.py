@@ -73,7 +73,7 @@ def generator_matrix_from_systematic(parity_check_matrix: NDArray) -> NDArray:
 
     # Verify that the matrix is in systematic form by looking for an identity matrix on the right side of the
     # parity-check matrix
-    if not np.array_equal(parity_check_matrix[:, -parity_bits:], np.identity(parity_bits)):
+    if not np.array_equal(parity_check_matrix[:, length-parity_bits:], np.identity(parity_bits)):
         raise ValueError("Check matrix is not in systematic form")
 
     # Get the parity part from the parity-check matrix
