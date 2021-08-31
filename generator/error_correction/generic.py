@@ -72,14 +72,14 @@ class GenericCode(abc.ABC):
         :return:
         """
         # Determine the file name and path
-        file_name = f"{self.__class__.__name__}_{self.data_bits}.txt"
+        file_name = f"{self.__class__.__name__}_{self.data_bits}.npy"
         file_path = Path(f"~/.cache/memory-controller-generator/{file_name}").expanduser()
 
         # Check if the matrix should be generated or loaded from file
         if not force_rebuild and file_path.exists():
             logging.info(f"Loading parity-check matrix from '{file_path}'")
             # Load the parity-check matrix from the file
-            self.parity_check_matrix = np.loadtxt(file_path, dtype=int)
+            self.parity_check_matrix = np.load(file_path)
             # Calculate the corresponding generator matrix from the parity-check matrix
             self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
         else:
@@ -87,7 +87,7 @@ class GenericCode(abc.ABC):
             # Make sure the parent folders exist
             file_path.parent.mkdir(parents=True, exist_ok=True)
             # Save the parity-check matrix to the file
-            np.savetxt(file_path, self.parity_check_matrix, fmt="%d")
+            np.save(file_path, self.parity_check_matrix)
 
     def encoder(self) -> "GenericEncoder":
         """
