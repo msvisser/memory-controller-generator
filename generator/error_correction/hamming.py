@@ -32,7 +32,7 @@ class HammingCode(GenericCode):
             self.correctable_errors.append((i,))
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
-        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
+        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=int)
 
         # Set the columns of the parity-check matrix to increasing binary values
         for col_idx, col in enumerate(self.parity_check_matrix.T):
@@ -65,7 +65,7 @@ class ExtendedHammingCode(HammingCode):
                 self.detectable_errors.append((i, j))
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
-        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
+        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=int)
 
         # Set the columns of the parity-check matrix to increasing binary values
         # For the extended hamming code we ignore the last row and column

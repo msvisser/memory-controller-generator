@@ -22,5 +22,5 @@ class ParityCode(GenericCode):
             self.detectable_errors.append((i,))
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
-        self.parity_check_matrix = np.ones((1, self.total_bits), dtype=np.int)
+        self.parity_check_matrix = np.ones((1, self.total_bits), dtype=int)
         self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)

@@ -17,5 +17,5 @@ class IdentityCode(GenericCode):
         super().__init__(data_bits=data_bits, parity_bits=0)
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
-        self.generator_matrix = np.identity(self.data_bits, dtype=np.int)
-        self.parity_check_matrix = np.zeros((0, self.data_bits), dtype=np.int)
+        self.generator_matrix = np.identity(self.data_bits, dtype=int)
+        self.parity_check_matrix = np.zeros((0, self.data_bits), dtype=int)

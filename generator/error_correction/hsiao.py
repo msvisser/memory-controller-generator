@@ -103,7 +103,7 @@ class HsiaoCode(GenericCode):
         # Extend the candidate with the identity columns
         lowest_candidate.extend(itertools.combinations(range(self.parity_bits), 1))
         # Build the parity-check matrix from the column definitions
-        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=np.int)
+        self.parity_check_matrix = np.zeros((self.parity_bits, self.total_bits), dtype=int)
         for col, set_rows in enumerate(lowest_candidate):
             for row in set_rows:
                 self.parity_check_matrix[row, col] = 1
@@ -168,7 +168,7 @@ class HsiaoConstructedCode(HsiaoCode):
         # Then append the smaller final sub-matrix
         parts.append(self.delta(self.parity_bits, max_weight, max_weight_columns))
         # Finally, append the identity matrix at the end
-        parts.append(np.identity(self.parity_bits, dtype=np.int))
+        parts.append(np.identity(self.parity_bits, dtype=int))
 
         # Build the parity-check matrix by stacking the parts
         self.parity_check_matrix = np.hstack(parts)
@@ -194,36 +194,36 @@ class HsiaoConstructedCode(HsiaoCode):
         if columns == 0:
             # No columns, so return a zero column matrix
             logging.debug(f"m==0 >> R: {rows}, w: {weight}")
-            return np.zeros((rows, 0), dtype=np.int)
+            return np.zeros((rows, 0), dtype=int)
         elif weight == 0:
             # Single column with zero weight
             logging.debug(f"J==0 >> R: {rows}, m: {columns}")
             assert columns == 1
-            return np.zeros((rows, 1), dtype=np.int)
+            return np.zeros((rows, 1), dtype=int)
         elif weight == rows:
             # Single column with maximum weight
             logging.debug(f"J==R >> R: {rows}, m: {columns}")
             assert columns == 1
-            return np.ones((rows, 1), dtype=np.int)
+            return np.ones((rows, 1), dtype=int)
         elif columns == 1:
             # Single column of specified weight, fill the first n rows with 1, where n = weight
             logging.debug(f"m==1 >> R: {rows}, J: {weight}")
-            mat = np.zeros((rows, 1), dtype=np.int)
+            mat = np.zeros((rows, 1), dtype=int)
             mat[0:weight] = 1
             return mat
         elif weight == 1:
             # Weight is 1, so identity matrix padded with zero rows
             logging.debug(f"J==1 >> R: {rows}, m: {columns}")
             assert rows >= columns
-            ident = np.identity(columns, dtype=np.int)
-            zeros = np.zeros((rows - columns, columns), dtype=np.int)
+            ident = np.identity(columns, dtype=int)
+            zeros = np.zeros((rows - columns, columns), dtype=int)
             return np.vstack((ident, zeros))
         elif weight == rows - 1:
             # Weight is rows - 1, so all ones with identity subtracted from the bottom rows
             logging.debug(f"J==R-1 >> R: {rows}, m: {columns}")
             assert rows >= columns
-            ones = np.ones((rows - columns, columns), dtype=np.int)
-            ident = 1 - np.identity(columns, dtype=np.int)
+            ones = np.ones((rows - columns, columns), dtype=int)
+            ident = 1 - np.identity(columns, dtype=int)
             return np.vstack((ones, ident))
         else:
             # General case that requires splitting
@@ -255,8 +255,8 @@ class HsiaoConstructedCode(HsiaoCode):
             delta2_prime = delta2[order]
 
             # Create the top row of the resulting matrix
-            ones = np.ones((1, m1), dtype=np.int)
-            zeros = np.zeros((1, columns - m1), dtype=np.int)
+            ones = np.ones((1, m1), dtype=int)
+            zeros = np.zeros((1, columns - m1), dtype=int)
             top = np.hstack((ones, zeros))
 
             # Create the bottom sub-matrix of the resulting matrix

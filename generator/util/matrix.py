@@ -13,7 +13,7 @@ def parity_check_matrix_to_systematic(input_parity_check_matrix: NDArray) -> Tup
     :return: systematic parity-check matrix, and a list of swapped columns
     :raises ValueError: if the input parity-check matrix contains a redundant row
     """
-    parity_check_matrix = np.array(input_parity_check_matrix, dtype=np.int)
+    parity_check_matrix = np.array(input_parity_check_matrix, dtype=int)
     rows, cols = parity_check_matrix.shape
     col_swaps = []
     row_swaps = list(range(rows))
@@ -79,7 +79,7 @@ def generator_matrix_from_systematic(parity_check_matrix: NDArray) -> NDArray:
     # Get the parity part from the parity-check matrix
     parity_part = parity_check_matrix[:, 0:data_bits]
     # Create a new identity matrix
-    identity_part = np.identity(data_bits, dtype=np.int)
+    identity_part = np.identity(data_bits, dtype=int)
     # Concatenate the matrices to create the generator matrix
     generator_matrix = np.hstack((identity_part, parity_part.T))
     return generator_matrix
@@ -103,7 +103,7 @@ def generator_matrix_from_parity_check_matrix(parity_check_matrix: NDArray) -> N
     generator_systematic = generator_matrix_from_systematic(parity_check_systematic)
 
     # Calculate the generator matrix for the original parity-check matrix
-    generator_matrix = np.array(generator_systematic, dtype=np.int)
+    generator_matrix = np.array(generator_systematic, dtype=int)
     for (a, b) in col_swaps[::-1]:
         generator_matrix[:, [b, a]] = generator_matrix[:, [a, b]]
 

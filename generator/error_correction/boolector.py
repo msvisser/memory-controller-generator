@@ -104,10 +104,10 @@ class BoolectorCode(GenericCode):
 
     def _parity_check_matrix_from_model(self):
         """Create a numpy matrix from the Boolector variable assignments."""
-        matrix = np.empty((self.parity_bits, self.total_bits), dtype=np.int)
+        matrix = np.empty((self.parity_bits, self.total_bits), dtype=int)
 
         for i, var in enumerate(self.all_vars):
-            col = np.fromiter(var.assignment[::-1], dtype=np.int)
+            col = np.fromiter(var.assignment[::-1], dtype=int)
             matrix[:, i] = col
 
         return matrix

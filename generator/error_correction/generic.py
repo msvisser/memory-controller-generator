@@ -294,7 +294,7 @@ class GenericFlipCalculator(Elaboratable):
         flip_bit_syndromes: List[List[int]] = [[] for _ in range(self.code.total_bits)]
         for error in self.code.correctable_errors:
             # Calculate the linear combination of the error bit columns in the parity-check matrix.
-            error_syn = np.zeros((self.code.parity_bits,), dtype=np.int)
+            error_syn = np.zeros((self.code.parity_bits,), dtype=int)
             for i in error:
                 error_syn ^= self.code.parity_check_matrix.T[i]
 
