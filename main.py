@@ -7,20 +7,13 @@ from nmigen.asserts import Assert
 from nmigen.cli import main_parser, main_runner
 
 import generator.error_correction
+from generator.error_correction import GenericCode
 from generator.util.reduce import or_reduce
 
 
 class TestTop(Elaboratable):
-    def __init__(self, data_bits, code_name, timeout, force_rebuild):
-        self.data_bits = data_bits
-        self.timeout = timeout
-        self.force_rebuild = force_rebuild
-
-        # Dynamically select the error correction code based on the supplied name
-        if not hasattr(generator.error_correction, code_name):
-            raise ValueError(f"Unknown error correction code: {code_name}")
-        code_class = getattr(generator.error_correction, code_name)
-        self.code: generator.error_correction.GenericCode = code_class(data_bits=data_bits)
+    def __init__(self, code: GenericCode):
+        self.code = code
 
         self.write_data = Signal(unsigned(self.code.total_bits))
         self.read_data = Signal(unsigned(self.code.total_bits))
@@ -33,17 +26,6 @@ class TestTop(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-
-        # Measure the time it takes to generate the matrices for this code
-        start = time.time()
-        self.code.generate_matrices_cached(timeout=self.timeout, force_rebuild=self.force_rebuild)
-        duration = 1000 * (time.time() - start)
-        logging.info(f"Matrix generation took {duration:.2f}ms")
-
-        # Log the parity-check matrix
-        logging.debug("Parity-check matrix:")
-        for row in self.code.parity_check_matrix:
-            logging.debug(f"  {row}")
 
         m.submodules.encoder = encoder = self.code.encoder()
         m.submodules.decoder = decoder = self.code.decoder()
@@ -135,13 +117,25 @@ if __name__ == "__main__":
     log_format = "%(levelname)8s: %(message)s"
     logging.basicConfig(level=log_level, format=log_format)
 
+    # Dynamically select the error correction code based on the supplied name
+    if not hasattr(generator.error_correction, args.code_name):
+        raise ValueError(f"Unknown error correction code: {args.code_name}")
+    code_class = getattr(generator.error_correction, args.code_name)
+    code = code_class(data_bits=args.data_bits)
+
+    # Measure the time it takes to generate the matrices for this code
+    start = time.time()
+    code.generate_matrices_cached(timeout=args.timeout, force_rebuild=args.force_rebuild)
+    duration = 1000 * (time.time() - start)
+    logging.info(f"Matrix generation took {duration:.2f}ms")
+
+    # Log the parity-check matrix
+    logging.debug("Parity-check matrix:")
+    for row in code.parity_check_matrix:
+        logging.debug(f"  {row}")
+
     # Create top module
-    top = TestTop(
-        data_bits=args.data_bits,
-        code_name=args.code_name,
-        timeout=args.timeout,
-        force_rebuild=args.force_rebuild,
-    )
+    top = TestTop(code=code)
 
     # Set the platform
     platform = args.platform
