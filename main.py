@@ -7,6 +7,8 @@ from nmigen.asserts import Assert
 from nmigen.cli import main_parser, main_runner
 
 import generator.error_correction
+from generator.controller import BasicController
+from generator.controller.write_back import WriteBackController
 from generator.error_correction import GenericCode
 from generator.util.reduce import or_reduce
 
@@ -135,7 +137,9 @@ if __name__ == "__main__":
         logging.debug(f"  {row}")
 
     # Create top module
-    top = TestTop(code=code)
+    # top = TestTop(code=code)
+    # top = BasicController(code=code, addr_width=32)
+    top = WriteBackController(code=code, addr_width=32)
 
     # Set the platform
     platform = args.platform
