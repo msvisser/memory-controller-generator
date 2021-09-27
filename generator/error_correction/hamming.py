@@ -43,7 +43,7 @@ class HammingCode(GenericCode):
         self.generator_matrix = generator_matrix_from_parity_check_matrix(self.parity_check_matrix)
 
 
-class ExtendedHammingCode(HammingCode):
+class ExtendedHammingCode(GenericCode):
     """
     Implementation of an extended Hamming code (SEC-DED).
 
@@ -54,12 +54,22 @@ class ExtendedHammingCode(HammingCode):
     """
 
     def __init__(self, data_bits: int) -> None:
-        # Inherit the number of parity bits from the Hamming code, but increment by one, as we are adding a single
-        # over-all parity check
-        super().__init__(data_bits=data_bits)
-        self.parity_bits += 1
+        # Calculate the number of parity bits with the same method as the Hamming code, but add one for the extra
+        # parity bit.
+        parity_bits = 0
+        for m in itertools.count():
+            if 2 ** m - m - 1 >= data_bits:
+                parity_bits = m
+                break
+        parity_bits += 1
 
-        # Add the list of detectable errors, correctable errors are inherited
+        super().__init__(data_bits=data_bits, parity_bits=parity_bits)
+
+        # Add the list of correctable errors
+        for i in range(self.total_bits):
+            self.correctable_errors.append((i,))
+
+        # Add the list of detectable errors
         for i in range(self.total_bits):
             for j in range(i + 1, self.total_bits):
                 self.detectable_errors.append((i, j))
