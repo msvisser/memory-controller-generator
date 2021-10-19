@@ -4,10 +4,9 @@ import unittest
 from nmigen import *
 from nmigen.back import pysim
 
-from generator.controller import BasicController
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord
+from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
 from generator.controller.write_back import WriteBackController
-from generator.error_correction import IdentityCode, GenericCode, HammingCode, ExtendedHammingCode
+from generator.error_correction import GenericCode, ExtendedHammingCode
 
 
 class WriteBackControllerTestTop(Elaboratable):
@@ -26,7 +25,11 @@ class WriteBackControllerTestTop(Elaboratable):
         self.req = MemoryRequestRecord(addr_bits, code.data_bits)
         self.rsp = MemoryResponseRecord(code.data_bits)
 
+        self.sram = SRAMInterfaceRecord(addr_bits, code.total_bits)
+
         self.bit_flipper = Signal(code.total_bits)
+
+        self.mem = None
 
     def elaborate(self, platform):
         m = Module()
@@ -34,7 +37,7 @@ class WriteBackControllerTestTop(Elaboratable):
         m.submodules.controller = controller = WriteBackController(self.code, addr_width=self.addr_bits)
 
         # Create a memory for simulation
-        mem = Memory(width=self.code.total_bits, depth=2 ** self.addr_bits, init=list(0 for _ in range(2 ** self.addr_bits)))
+        self.mem = mem = Memory(width=self.code.total_bits, depth=2 ** self.addr_bits, init=list(0 for _ in range(2 ** self.addr_bits)))
         read_port = mem.read_port(transparent=False)
         write_port = mem.write_port()
         m.submodules += read_port, write_port
@@ -50,6 +53,14 @@ class WriteBackControllerTestTop(Elaboratable):
             write_port.data.eq(controller.sram.write_data),
         ]
 
+        m.d.comb += [
+            self.sram.addr.eq(controller.sram.addr),
+            self.sram.clk_en.eq(controller.sram.clk_en),
+            self.sram.write_en.eq(controller.sram.write_en),
+            self.sram.write_data.eq(controller.sram.write_data),
+            self.sram.read_data.eq(controller.sram.read_data),
+        ]
+
         # Hook up all other controller signals to the external signals
         m.d.comb += [
             self.req.connect(controller.req),
@@ -57,6 +68,9 @@ class WriteBackControllerTestTop(Elaboratable):
         ]
 
         return m
+
+    def ports(self):
+        return [*self.req.ports(), *self.rsp.ports(), *self.sram.ports(), self.bit_flipper]
 
 
 class TestBasicController(unittest.TestCase):
@@ -107,7 +121,7 @@ class TestBasicController(unittest.TestCase):
                 enable = random.random()
                 if enable < 0.1:
                     offset = random.randint(0, code.total_bits - 1)
-                    yield top.bit_flipper.eq(3 << offset)
+                    # yield top.bit_flipper.eq(3 << offset)
                 elif enable < 0.5:
                     offset = random.randint(0, code.total_bits)
                     yield top.bit_flipper.eq(1 << offset)
@@ -142,11 +156,13 @@ class TestBasicController(unittest.TestCase):
                     if last_write_en:
                         expected = memory_previous[last_addr]
                         if not uncorrectable_error:
+                            # print(f"{last_addr} {data:x} {expected:x}")
                             self.assertEqual(data, expected)
                     # If the last operation was a read, check the current memory state
                     else:
                         expected = memory_mirror[last_addr]
                         if not uncorrectable_error:
+                            # print(f"{last_addr} {data:x} {expected:x}")
                             self.assertEqual(data, expected)
 
                     outstanding_request -= 1
