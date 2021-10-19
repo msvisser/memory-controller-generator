@@ -130,3 +130,7 @@ dmypy.json
 
 # JetBrains PyCharm
 .idea/
+
+# VCD and GTKWave saves
+*.vcd
+*.gtkw
