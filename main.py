@@ -10,6 +10,7 @@ import generator.error_correction
 from generator.controller import BasicController
 from generator.controller.write_back import WriteBackController
 from generator.error_correction import GenericCode
+from generator.testbench.cxxrtl import CXXRTLTestbench
 from generator.util.reduce import or_reduce
 
 
@@ -104,6 +105,7 @@ if __name__ == "__main__":
     # Build the commandline argument parser
     parser = main_parser()
     parser.add_argument("-c", "--code", dest="code_name", default="HammingCode")
+    parser.add_argument("-x", "--controller", dest="controller_name", default="BasicController")
     parser.add_argument("-b", "--bits", dest="data_bits", default=32, type=int)
     parser.add_argument("-v", "--verbose", dest="verbose", action="count", default=0)
     parser.add_argument("-p", "--platform", dest="platform", default=None)
@@ -125,6 +127,11 @@ if __name__ == "__main__":
     code_class = getattr(generator.error_correction, args.code_name)
     code = code_class(data_bits=args.data_bits)
 
+    # Dynamically select the controller based on the supplied name
+    if not hasattr(generator.controller, args.controller_name):
+        raise ValueError(f"Unknown controller: {args.controller_name}")
+    controller_class = getattr(generator.controller, args.controller_name)
+
     # Measure the time it takes to generate the matrices for this code
     start = time.time()
     code.generate_matrices_cached(timeout=args.timeout, force_rebuild=args.force_rebuild)
@@ -139,7 +146,9 @@ if __name__ == "__main__":
     # Create top module
     # top = TestTop(code=code)
     # top = BasicController(code=code, addr_width=32)
-    top = WriteBackController(code=code, addr_width=32)
+    # top = WriteBackController(code=code, addr_width=32)
+    # top = CXXRTLTestbench(code=code, addr_bits=10)
+    top = controller_class(code=code, addr_width=13)
 
     # Set the platform
     platform = args.platform
