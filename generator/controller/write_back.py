@@ -45,10 +45,7 @@ class WriteBackController(Elaboratable):
 
         # When a request fires it is accepted, therefore the response should always be valid on the next cycle
         with m.If(req_fire):
-            m.d.sync += [
-                self.rsp.valid.eq(1),
-                response_writeback_valid.eq(~self.req.write_en),
-            ]
+            m.d.sync += self.rsp.valid.eq(1)
         # If no request fires and the response does fire, the buffered response is consumed and no longer valid
         with m.Elif(rsp_fire):
             m.d.sync += self.rsp.valid.eq(0)
@@ -63,7 +60,10 @@ class WriteBackController(Elaboratable):
                 self.sram.write_data.eq(decoder.enc_out),
             ]
 
-        m.d.sync += response_writeback_valid.eq(0)
+        with m.If(req_fire):
+            m.d.sync += response_writeback_valid.eq(~self.req.write_en)
+        with m.Else():
+            m.d.sync += response_writeback_valid.eq(0)
 
         return m
 
