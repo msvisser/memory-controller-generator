@@ -18,6 +18,24 @@ class MemoryRequestRecord(Record):
         return self.fields.values()
 
 
+class MemoryRequestWithPartialRecord(Record):
+    """Record for memory request signals used by a controller."""
+
+    def __init__(self, addr_width: int, data_width: int, granularity: int):
+        assert data_width % granularity == 0
+        super().__init__([
+            ("valid", 1, DIR_FANOUT),
+            ("ready", 1, DIR_FANIN),
+            ("addr", addr_width, DIR_FANOUT),
+            ("write_en", 1, DIR_FANOUT),
+            ("write_data", data_width, DIR_FANOUT),
+            ("write_mask", data_width // granularity, DIR_FANOUT),
+        ], src_loc_at=1)
+
+    def ports(self) -> [Signal]:
+        return self.fields.values()
+
+
 class MemoryResponseRecord(Record):
     """Record for memory response signals used by a controller."""
 

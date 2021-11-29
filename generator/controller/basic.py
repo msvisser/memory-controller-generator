@@ -1,10 +1,9 @@
 from nmigen import *
 
-from .record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
-from ..error_correction import GenericCode
+from .generic import GenericController
 
 
-class BasicController(Elaboratable):
+class BasicController(GenericController):
     """
     Simplest implementation of an error correcting memory controller.
 
@@ -13,17 +12,6 @@ class BasicController(Elaboratable):
     the request and response ports to make sure no requests are accepted when we are unable to handle them,
     and that all responses are only delivered once.
     """
-
-    def __init__(self, code: GenericCode, addr_width):
-        self.code = code
-
-        # User interface
-        self.req = MemoryRequestRecord(addr_width, code.data_bits)
-        self.rsp = MemoryResponseRecord(code.data_bits)
-
-        # SRAM interface
-        self.sram = SRAMInterfaceRecord(addr_width, code.total_bits)
-
     def elaborate(self, platform):
         m = Module()
 
@@ -40,7 +28,7 @@ class BasicController(Elaboratable):
             self.sram.write_en.eq(self.req.write_en),
             encoder.data_in.eq(self.req.write_data),
             self.sram.write_data.eq(encoder.enc_out),
-            self.req.ready.eq(self.rsp.ready),
+            self.req.ready.eq((self.rsp.valid & self.rsp.ready) | ~self.rsp.valid),
 
             # Connect decoder
             decoder.enc_in.eq(self.sram.read_data),
@@ -57,6 +45,3 @@ class BasicController(Elaboratable):
             m.d.sync += self.rsp.valid.eq(0)
 
         return m
-
-    def ports(self):
-        return [*self.req.ports(), *self.rsp.ports(), *self.sram.ports()]

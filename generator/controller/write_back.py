@@ -1,19 +1,9 @@
 from nmigen import *
 
-from .record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
-from ..error_correction import GenericCode
+from .generic import GenericController
 
 
-class WriteBackController(Elaboratable):
-    def __init__(self, code: GenericCode, addr_width: int):
-        self.code = code
-        self.addr_width = addr_width
-
-        self.req = MemoryRequestRecord(addr_width, code.data_bits)
-        self.rsp = MemoryResponseRecord(code.data_bits)
-
-        self.sram = SRAMInterfaceRecord(addr_width, code.total_bits)
-
+class WriteBackController(GenericController):
     def elaborate(self, platform):
         m = Module()
 
@@ -34,14 +24,24 @@ class WriteBackController(Elaboratable):
             self.sram.write_en.eq(self.req.write_en),
             encoder.data_in.eq(self.req.write_data),
             self.sram.write_data.eq(encoder.enc_out),
-            self.req.ready.eq(self.rsp.ready),
+            self.req.ready.eq((self.rsp.valid & self.rsp.ready) | ~self.rsp.valid),
 
             # Connect decoder
             decoder.enc_in.eq(self.sram.read_data),
-            self.rsp.read_data.eq(decoder.data_out),
-            self.rsp.error.eq(decoder.error),
-            self.rsp.uncorrectable_error.eq(decoder.uncorrectable_error),
         ]
+
+        with m.If(self.rsp.valid):
+            m.d.comb += [
+                self.rsp.read_data.eq(decoder.data_out),
+                self.rsp.error.eq(decoder.error),
+                self.rsp.uncorrectable_error.eq(decoder.uncorrectable_error),
+            ]
+        with m.Else():
+            m.d.comb += [
+                self.rsp.read_data.eq(0),
+                self.rsp.error.eq(0),
+                self.rsp.uncorrectable_error.eq(0),
+            ]
 
         # When a request fires it is accepted, therefore the response should always be valid on the next cycle
         with m.If(req_fire):
@@ -66,6 +66,3 @@ class WriteBackController(Elaboratable):
             m.d.sync += response_writeback_valid.eq(0)
 
         return m
-
-    def ports(self) -> [Signal]:
-        return [*self.req.ports(), *self.rsp.ports(), *self.sram.ports()]
