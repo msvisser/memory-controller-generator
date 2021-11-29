@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import List
 
 import numpy as np
 from nmigen import *
@@ -8,6 +9,10 @@ from nmigen.cli import main_parser, main_runner
 
 import generator.error_correction
 from generator.controller import BasicController
+from generator.controller.generic import GenericController
+from generator.controller.partial_wrapper import PartialWriteWrapper
+from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, MemoryRequestWithPartialRecord, \
+    SRAMInterfaceRecord
 from generator.controller.write_back import WriteBackController
 from generator.error_correction import GenericCode
 from generator.testbench.cxxrtl import CXXRTLTestbench
@@ -99,6 +104,27 @@ class TestTop(Elaboratable):
         ]
 
 
+class WrapperTop(Elaboratable):
+    def __init__(self, controller: GenericController):
+        self.controller = controller
+
+        self.req = MemoryRequestWithPartialRecord(controller.addr_width, controller.code.data_bits, granularity=8)
+        self.rsp = MemoryResponseRecord(controller.code.data_bits)
+
+        self.sram = SRAMInterfaceRecord(controller.addr_width, controller.code.data_bits)
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.controller = self.controller
+        m.submodules.wrapper = PartialWriteWrapper(addr_width=self.controller.addr_width, data_bits=self.controller.code.data_bits)
+
+        return m
+
+    def ports(self) -> List[Signal]:
+        return [*self.req.ports(), *self.rsp.ports(), *self.sram.ports()]
+
+
 if __name__ == "__main__":
     np.set_printoptions(linewidth=200)
 
@@ -148,7 +174,9 @@ if __name__ == "__main__":
     # top = BasicController(code=code, addr_width=32)
     # top = WriteBackController(code=code, addr_width=32)
     # top = CXXRTLTestbench(code=code, addr_bits=10)
-    top = controller_class(code=code, addr_width=13)
+
+    ctrl = controller_class(code=code, addr_width=13)
+    top = WrapperTop(ctrl)
 
     # Set the platform
     platform = args.platform
