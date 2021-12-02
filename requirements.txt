@@ -1,8 +1,6 @@
-Jinja2==3.0.1
-logging==0.4.9.6
-MarkupSafe==2.0.1
-nmigen==0.2
-numpy==1.21.0
-PyBoolector==3.2.2.20210617.2
-pyvcd==0.1.7
-six==1.16.0
+# nMigen package
+nmigen @ git+https://github.com/nmigen/nmigen.git@0b28a97ca00b44301fb35e2426d571e4f6640040#egg=nmigen
+
+# Numpy and Boolector for matrix generation
+numpy>=1.21
+PyBoolector>=3.2
