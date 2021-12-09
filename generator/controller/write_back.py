@@ -10,10 +10,6 @@ class WriteBackController(GenericController):
         m.submodules.encoder = encoder = self.code.encoder()
         m.submodules.decoder = decoder = self.code.decoder()
 
-        response_writeback_valid = Signal()
-        last_req_addr = Signal(unsigned(self.addr_width))
-        m.d.sync += last_req_addr.eq(self.req.addr)
-
         req_fire = self.req.valid & self.req.ready
         rsp_fire = self.rsp.valid & self.rsp.ready
 
@@ -28,20 +24,10 @@ class WriteBackController(GenericController):
 
             # Connect decoder
             decoder.enc_in.eq(self.sram.read_data),
+            self.rsp.read_data.eq(decoder.data_out),
+            self.rsp.error.eq(decoder.error),
+            self.rsp.uncorrectable_error.eq(decoder.uncorrectable_error),
         ]
-
-        with m.If(self.rsp.valid):
-            m.d.comb += [
-                self.rsp.read_data.eq(decoder.data_out),
-                self.rsp.error.eq(decoder.error),
-                self.rsp.uncorrectable_error.eq(decoder.uncorrectable_error),
-            ]
-        with m.Else():
-            m.d.comb += [
-                self.rsp.read_data.eq(0),
-                self.rsp.error.eq(0),
-                self.rsp.uncorrectable_error.eq(0),
-            ]
 
         # When a request fires it is accepted, therefore the response should always be valid on the next cycle
         with m.If(req_fire):
@@ -49,6 +35,10 @@ class WriteBackController(GenericController):
         # If no request fires and the response does fire, the buffered response is consumed and no longer valid
         with m.Elif(rsp_fire):
             m.d.sync += self.rsp.valid.eq(0)
+
+        response_writeback_valid = Signal()
+        last_req_addr = Signal(unsigned(self.addr_width))
+        m.d.sync += last_req_addr.eq(self.req.addr)
 
         with m.If(response_writeback_valid & decoder.error & ~decoder.uncorrectable_error):
             m.d.comb += [
