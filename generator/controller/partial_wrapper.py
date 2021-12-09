@@ -25,8 +25,6 @@ class PartialWriteWrapper(Elaboratable):
             self.rsp_in.connect(self.rsp_out),
         ]
 
-        state = Signal(unsigned(2))
-
         tmp_req_addr = Signal(unsigned(self.addr_width))
         tmp_req_data = Signal(unsigned(self.data_bits))
         tmp_req_mask = Signal(unsigned(self.data_bits // 8))
@@ -101,49 +99,6 @@ class PartialWriteWrapper(Elaboratable):
                 # Wait until the write request is accepted
                 with m.If(self.req_out.ready):
                     m.next = "IDLE"
-
-        # state = Signal()
-        # addr = Signal(unsigned(self.addr_width))
-        # data = Signal(unsigned(self.data_bits))
-        # write_mask = Signal(unsigned(self.data_bits // 8))
-        #
-        # with m.If(self.req_in.valid & self.req_in.write_en & ~self.req_in.write_mask.all()):
-        #     m.d.comb += self.req_out.write_en.eq(0)
-        #     m.d.sync += [
-        #         state.eq(1),
-        #         addr.eq(self.req_in.addr),
-        #         data.eq(self.req_in.write_data),
-        #         write_mask.eq(self.req_in.write_mask),
-        #     ]
-        #
-        # m.d.comb += self.req_in.ready.eq(self.req_out.ready & (state == 0))
-        #
-        # with m.If(state == 1):
-        #     old_write_data = Signal(unsigned(self.data_bits))
-        #     new_write_data = Signal(unsigned(self.data_bits))
-        #     m.d.comb += new_write_data.eq(self.rsp_in.read_data)
-        #
-        #     for i in range(self.data_bits // 8):
-        #         with m.If(write_mask[i]):
-        #             m.d.comb += new_write_data.word_select(i, 8).eq(data.word_select(i, 8))
-        #
-        #     with m.If(self.rsp_in.valid):
-        #         m.d.sync += old_write_data.eq(new_write_data)
-        #     with m.Else():
-        #         m.d.comb += new_write_data.eq(old_write_data)
-        #
-        #     m.d.comb += [
-        #         self.req_out.valid.eq(1),
-        #         self.req_out.addr.eq(addr),
-        #         self.req_out.write_en.eq(1),
-        #         self.req_out.write_data.eq(new_write_data),
-        #
-        #         self.rsp_out.valid.eq(0),
-        #         self.rsp_in.ready.eq(1),
-        #     ]
-        #
-        #     with m.If(self.req_out.ready):
-        #         m.d.sync += state.eq(0)
 
         return m
 
