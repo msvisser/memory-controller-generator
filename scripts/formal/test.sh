@@ -4,7 +4,7 @@ BITS=32
 function run_test {
   echo -n "[ .... ] $1"
 
-  python ../../main.py -c $1 -b ${BITS} -p formal generate > test.v 2> /dev/null
+  python ../../main.py -c $1 -b ${BITS} -p formal generate test.v 2> /dev/null
   sby -f test.sby > /dev/null
 
   if [ $? -eq 0 ]; then
