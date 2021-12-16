@@ -6,6 +6,17 @@ from generator.controller.record import MemoryResponseRecord, MemoryRequestRecor
 
 
 class RefreshWrapper(Elaboratable):
+    """
+    Automatic memory refresh wrapper implementation.
+
+    This wrapper will automatically insert a read request every n cycles for incrementing memory addresses. The
+    response of to this read request will be caught by the wrapper and ignored. When combined with the
+    `WriteBackController` this will cause memory locations with errors to be corrected automatically. Without this
+    controller the read requests might not actually do anything.
+
+    To simplify the use of this wrapper, a controller implementation `RefreshController` exists which combines the
+    `WriteBackController` with this `RefreshWrapper` to create a complete controller.
+    """
     def __init__(self, addr_width: int, data_bits: int, refresh_counter_width: int):
         self.addr_width = addr_width
         self.data_bits = data_bits
@@ -26,15 +37,19 @@ class RefreshWrapper(Elaboratable):
             self.rsp_in.connect(self.rsp_out),
         ]
 
+        # Create an automatically incrementing counter to periodically refresh
         counter = Signal(unsigned(self.refresh_counter_width))
         m.d.sync += counter.eq(counter + 1)
 
+        # Set refresh pending when the counter reaches the maximum value
         refresh_pending = Signal()
         with m.If(counter.all()):
             m.d.sync += refresh_pending.eq(1)
 
+        # Keep track of the current refresh address
         current_address = Signal(unsigned(self.addr_width))
 
+        # High when a refresh request has been sent and it is waiting for a response
         waiting_for_response = Signal()
 
         with m.If(~waiting_for_response):
@@ -47,7 +62,9 @@ class RefreshWrapper(Elaboratable):
                     self.req_out.write_en.eq(0),
                 ]
 
+                # Wait until the request is accepted
                 with m.If(self.req_out.ready):
+                    # Increment the current address and start waiting for a response
                     m.d.sync += [
                         refresh_pending.eq(0),
                         current_address.eq(current_address + 1),
