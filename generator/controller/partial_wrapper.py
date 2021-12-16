@@ -6,6 +6,18 @@ from generator.controller.record import MemoryRequestWithPartialRecord, MemoryRe
 
 
 class PartialWriteWrapper(Elaboratable):
+    """
+    Wrapper which will translate non-word write operations to a pair of read and write operations.
+
+    This wrapper will translate byte and halfword write operations to a full word read and write operation. This is
+    required with the error correcting memory controllers as they only accept full word operations. This is a limitation
+    of error correction as it does not allow partial updates, without recalculating all the error correction data.
+
+    The implementation uses a small state machine to first translate a write request to a read request. After this it
+    will wait for the response to the read, and craft a new write operation with the correct bytes replaced with new
+    data. This write request is then sent to the memory controller again. The response to this write request will be
+    returned as a response to the original write request.
+    """
     def __init__(self, addr_width: int, data_bits: int):
         self.addr_width = addr_width
         self.data_bits = data_bits
