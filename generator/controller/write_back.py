@@ -36,23 +36,29 @@ class WriteBackController(GenericController):
         with m.Elif(rsp_fire):
             m.d.sync += self.rsp.valid.eq(0)
 
+        # Keep track of when a write-back operation might be valid (after a read request)        
         response_writeback_valid = Signal()
+        with m.If(req_fire):
+            m.d.sync += response_writeback_valid.eq(~self.req.write_en)
+        with m.Else():
+            m.d.sync += response_writeback_valid.eq(0)
+        
+        # Keep the address of the last request
         last_req_addr = Signal(unsigned(self.addr_width))
         m.d.sync += last_req_addr.eq(self.req.addr)
 
+        # If the previous request was a read and the decoder detected a correctable error
         with m.If(response_writeback_valid & decoder.error & ~decoder.uncorrectable_error):
-            m.d.comb += [
-                self.req.ready.eq(0),
+            # Do not accept a request this cycle
+            m.d.comb += self.req.ready.eq(0)
 
+            # Write the corrected value back to the memory. This does not cause a response to be created, as no request
+            # is accepted from the external interface.
+            m.d.comb += [
                 self.sram.clk_en.eq(1),
                 self.sram.addr.eq(last_req_addr),
                 self.sram.write_en.eq(1),
                 self.sram.write_data.eq(decoder.enc_out),
             ]
-
-        with m.If(req_fire):
-            m.d.sync += response_writeback_valid.eq(~self.req.write_en)
-        with m.Else():
-            m.d.sync += response_writeback_valid.eq(0)
 
         return m
