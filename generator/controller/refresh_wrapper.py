@@ -1,6 +1,6 @@
 from typing import List
 
-from nmigen import *
+from amaranth import *
 
 from generator.controller.record import MemoryResponseRecord, MemoryRequestRecord
 

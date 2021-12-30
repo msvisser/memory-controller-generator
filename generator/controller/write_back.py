@@ -1,4 +1,4 @@
-from nmigen import *
+from amaranth import *
 
 from .generic import GenericController
 

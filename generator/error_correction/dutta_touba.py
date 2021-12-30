@@ -4,7 +4,7 @@ import math
 from typing import List, Optional
 
 import numpy as np
-from nmigen.utils import bits_for
+from amaranth.utils import bits_for
 from pyboolector import BoolectorNode
 
 from . import BoolectorCode

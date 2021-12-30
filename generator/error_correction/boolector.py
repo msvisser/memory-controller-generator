@@ -8,7 +8,7 @@ from typing import Optional, List, Sequence
 
 import numpy as np
 import pyboolector
-from nmigen.utils import bits_for
+from amaranth.utils import bits_for
 from pyboolector import Boolector, BoolectorNode
 
 from . import GenericCode

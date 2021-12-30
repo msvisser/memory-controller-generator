@@ -3,9 +3,9 @@ import time
 from typing import List
 
 import numpy as np
-from nmigen import *
-from nmigen.asserts import Assert
-from nmigen.cli import main_parser, main_runner
+from amaranth import *
+from amaranth.asserts import Assert
+from amaranth.cli import main_parser, main_runner
 
 import generator.error_correction
 from generator.controller import BasicController

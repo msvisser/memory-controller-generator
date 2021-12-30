@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, List, Tuple
 
 import numpy as np
-from nmigen import *
+from amaranth import *
 from numpy.typing import NDArray
 
 from ..util.matrix import np_array_to_value, generator_matrix_from_parity_check_matrix

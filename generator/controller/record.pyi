@@ -3,7 +3,7 @@ This stub file is required to get working auto-complete on the attributes of a r
 attributes when building records, an IDE cannot determine these attributes with simple static analysis. Instead the
 attributes are defined as instance variables here, tricking auto-complete into showing them.
 """
-from nmigen import Signal, Record
+from amaranth import Signal, Record
 
 
 class MemoryRequestRecord(Record):

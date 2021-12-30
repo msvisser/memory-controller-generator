@@ -2,7 +2,7 @@ import itertools
 from typing import Optional
 
 import numpy as np
-from nmigen import *
+from amaranth import *
 
 from . import GenericCode, GenericErrorCalculator
 from ..util.matrix import generator_matrix_from_parity_check_matrix

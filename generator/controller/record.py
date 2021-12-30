@@ -1,5 +1,5 @@
-from nmigen import Signal
-from nmigen.hdl.rec import DIR_FANOUT, DIR_FANIN, Record
+from amaranth import Signal
+from amaranth.hdl.rec import DIR_FANOUT, DIR_FANIN, Record
 
 
 class MemoryRequestRecord(Record):

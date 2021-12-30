@@ -1,4 +1,4 @@
-from nmigen import *
+from amaranth import *
 
 from generator.controller import BasicController, WriteBackController
 from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord

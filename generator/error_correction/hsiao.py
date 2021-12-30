@@ -6,7 +6,7 @@ from collections import Counter
 from typing import Optional
 
 import numpy as np
-from nmigen import *
+from amaranth import *
 from numpy.typing import NDArray
 
 from . import GenericCode, GenericErrorCalculator
