@@ -117,7 +117,16 @@ class WrapperTop(Elaboratable):
         m = Module()
 
         m.submodules.controller = self.controller
-        m.submodules.wrapper = PartialWriteWrapper(addr_width=self.controller.addr_width, data_bits=self.controller.code.data_bits)
+        m.submodules.wrapper = wrapper = PartialWriteWrapper(addr_width=self.controller.addr_width, data_bits=self.controller.code.data_bits)
+
+        m.d.comb += [
+            self.req.connect(wrapper.req_in),
+            wrapper.req_out.connect(self.controller.req),
+            self.controller.rsp.connect(wrapper.rsp_in),
+            wrapper.rsp_in.connect(self.rsp),
+
+            self.controller.sram.connect(self.sram),
+        ]
 
         return m
 
