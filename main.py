@@ -123,7 +123,7 @@ class WrapperTop(Elaboratable):
             self.req.connect(wrapper.req_in),
             wrapper.req_out.connect(self.controller.req),
             self.controller.rsp.connect(wrapper.rsp_in),
-            wrapper.rsp_in.connect(self.rsp),
+            wrapper.rsp_out.connect(self.rsp),
 
             self.controller.sram.connect(self.sram),
         ]
