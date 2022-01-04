@@ -66,7 +66,7 @@ class ForceRefreshController(GenericController):
         return m
 
 
-class InsaneRefreshController(GenericController):
+class ContinuousRefreshController(GenericController):
     """
     Implementation of an automatically refreshing memory controller.
 
