@@ -2,7 +2,7 @@
 BITS=32
 
 function run_test {
-  python ../../main.py -c $1 -b ${BITS} generate |
+  python ../../main.py -c $1 -b ${BITS} generate -t v |
   yosys -c test.tcl -f verilog - |
   grep "Chip area for\|Delay ="
 
