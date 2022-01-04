@@ -4,3 +4,6 @@ amaranth~=0.3
 # Numpy and Boolector for matrix generation
 numpy~=1.21
 PyBoolector~=3.2
+
+# Matplotlib for plotting
+matplotlib~=3.5
