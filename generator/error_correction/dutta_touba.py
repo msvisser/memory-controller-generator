@@ -34,10 +34,17 @@ class DuttaToubaCode(BoolectorCode):
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:
         super().generate_matrices(timeout=timeout)
+        self._determine_detectable_errors()
 
-        # Not all random 2-bit errors are detectable, but some are, so they are calculated here for use in the formal
-        # verification.
+    def generate_matrices_cached(self, timeout: Optional[float] = None, force_rebuild: bool = False) -> None:
+        super().generate_matrices_cached(timeout=timeout, force_rebuild=force_rebuild)
+        self._determine_detectable_errors()
 
+    def _determine_detectable_errors(self):
+        """
+        Determine the detectable errors from the parity-check matrix, as this is not possible to do in any other way.
+        Not all random 2-bit errors are detectable by this code.
+        """
         # Calculate all correctable syndromes
         correctable_syndromes = []
         for column in self.parity_check_matrix.T:
