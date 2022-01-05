@@ -25,6 +25,7 @@ if [ -z $1 ]; then
   run_test HsiaoCode
   run_test HsiaoConstructedCode
   run_test DuttaToubaCode
+  run_test SheLiCode
 else
   run_test $1
 fi
