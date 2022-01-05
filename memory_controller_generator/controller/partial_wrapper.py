@@ -2,7 +2,7 @@ from typing import List
 
 from amaranth import *
 
-from generator.controller.record import MemoryRequestWithPartialRecord, MemoryResponseRecord, MemoryRequestRecord
+from .record import MemoryRequestWithPartialRecord, MemoryResponseRecord, MemoryRequestRecord
 
 
 class PartialWriteWrapper(Elaboratable):

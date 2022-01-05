@@ -1,8 +1,8 @@
 from amaranth import *
 
-from generator.controller import BasicController, WriteBackController
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
-from generator.error_correction import GenericCode
+from ..controller import BasicController, WriteBackController
+from ..controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
+from ..error_correction import GenericCode
 
 
 class CXXRTLTestbench(Elaboratable):

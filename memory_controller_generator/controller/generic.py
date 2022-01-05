@@ -2,8 +2,8 @@ from typing import List
 
 from amaranth import *
 
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
-from generator.error_correction import GenericCode
+from .record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
+from ..error_correction import GenericCode
 
 
 class GenericController(Elaboratable):

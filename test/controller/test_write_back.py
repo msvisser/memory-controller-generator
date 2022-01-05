@@ -4,9 +4,9 @@ import unittest
 from nmigen import *
 from nmigen.back import pysim
 
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
-from generator.controller.write_back import WriteBackController
-from generator.error_correction import GenericCode, ExtendedHammingCode
+from memory_controller_generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
+from memory_controller_generator.controller.write_back import WriteBackController
+from memory_controller_generator.error_correction import GenericCode, ExtendedHammingCode
 
 
 class WriteBackControllerTestTop(Elaboratable):

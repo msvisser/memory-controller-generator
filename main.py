@@ -7,16 +7,16 @@ from amaranth import *
 from amaranth.asserts import Assert
 from amaranth.cli import main_parser, main_runner
 
-import generator.error_correction
-from generator.controller import BasicController
-from generator.controller.generic import GenericController
-from generator.controller.partial_wrapper import PartialWriteWrapper
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, MemoryRequestWithPartialRecord, \
-    SRAMInterfaceRecord
-from generator.controller.write_back import WriteBackController
-from generator.error_correction import GenericCode
-from generator.testbench.cxxrtl import CXXRTLTestbench
-from generator.util.reduce import or_reduce
+import memory_controller_generator.error_correction
+from memory_controller_generator.controller import BasicController
+from memory_controller_generator.controller.generic import GenericController
+from memory_controller_generator.controller.partial_wrapper import PartialWriteWrapper
+from memory_controller_generator.controller.record import MemoryRequestRecord, MemoryResponseRecord, \
+    MemoryRequestWithPartialRecord, SRAMInterfaceRecord
+from memory_controller_generator.controller.write_back import WriteBackController
+from memory_controller_generator.error_correction import GenericCode
+from memory_controller_generator.testbench.cxxrtl import CXXRTLTestbench
+from memory_controller_generator.util.reduce import or_reduce
 
 
 class TestTop(Elaboratable):
@@ -157,15 +157,15 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level, format=log_format)
 
     # Dynamically select the error correction code based on the supplied name
-    if not hasattr(generator.error_correction, args.code_name):
+    if not hasattr(memory_controller_generator.error_correction, args.code_name):
         raise ValueError(f"Unknown error correction code: {args.code_name}")
-    code_class = getattr(generator.error_correction, args.code_name)
+    code_class = getattr(memory_controller_generator.error_correction, args.code_name)
     code = code_class(data_bits=args.data_bits)
 
     # Dynamically select the controller based on the supplied name
-    if not hasattr(generator.controller, args.controller_name):
+    if not hasattr(memory_controller_generator.controller, args.controller_name):
         raise ValueError(f"Unknown controller: {args.controller_name}")
-    controller_class = getattr(generator.controller, args.controller_name)
+    controller_class = getattr(memory_controller_generator.controller, args.controller_name)
 
     # Measure the time it takes to generate the matrices for this code
     start = time.time()

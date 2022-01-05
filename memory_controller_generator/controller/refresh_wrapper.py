@@ -2,7 +2,7 @@ from typing import List
 
 from amaranth import *
 
-from generator.controller.record import MemoryResponseRecord, MemoryRequestRecord
+from .record import MemoryResponseRecord, MemoryRequestRecord
 
 
 class RefreshWrapper(Elaboratable):

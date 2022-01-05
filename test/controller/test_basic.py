@@ -4,9 +4,9 @@ import unittest
 from nmigen import *
 from nmigen.back import pysim
 
-from generator.controller import BasicController
-from generator.controller.record import MemoryRequestRecord, MemoryResponseRecord
-from generator.error_correction import IdentityCode, GenericCode
+from memory_controller_generator.controller import BasicController
+from memory_controller_generator.controller.record import MemoryRequestRecord, MemoryResponseRecord
+from memory_controller_generator.error_correction import IdentityCode, GenericCode
 
 
 class BasicControllerTestTop(Elaboratable):
