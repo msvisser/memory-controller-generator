@@ -13,6 +13,26 @@ from ..util.reduce import or_reduce
 
 
 class DuttaToubaCode(BoolectorCode):
+    """
+    Implementation of the SEC-DAEC-DED code defined by Dutta and Touba in [1].
+
+    This code will always correct 1-bit errors and 2-bit adjacent errors correctly. However, the 2-bit random error
+    detection will only detect errors in approximately 40-50% of all possible cases. In the cases where a 2-bit error
+    is not detected, it will result in a miscorrection. The code will log the number of miscorrected syndromes after
+    generation of the parity-check matrix.
+
+    This implementation uses the ``BoolectorCode`` framework to search for a parity-check matrix with the required
+    properties. Furthermore, it will try to minimize the maximum number of ones per row, the total number of ones and
+    the number of miscorrected double errors.
+
+    While optimizing the first two goals should finish in about a minute for a 32-bit code, optimizing for the number
+    of miscorrected double errors can take a long time. While this optimization is not required for the correct
+    operation of the error correction code, it can improve the performance quite a bit.
+
+    [1] A. Dutta and N. Touba, "Multiple Bit Upset Tolerant Memory Using a Selective Cycle Avoidance Based
+    SEC-DED-DAEC Code", 2007.
+    """
+
     def __init__(self, data_bits):
         # Determine the number of parity bits required for the specified number of data bits
         parity_bits = 0

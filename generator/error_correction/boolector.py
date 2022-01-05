@@ -44,6 +44,26 @@ class BoolectorOptimizationGoal:
 
 
 class BoolectorCode(GenericCode):
+    """
+    Boolector based auto-optimizing implementation of an error correction code.
+
+    This implementation does not actually provide an error correction code, instead it can be used as the base of
+    other error correction codes that require an optimizing search to generate their matrices.
+
+    Basic implementations using this base class can only implement the ``conditions`` method, which allows them to
+    give the conditions on the parity-check matrix. When the parity-check matrix is generated these conditions will
+    be satisfied by Boolector, or an error will be thrown. Boolector will generate a parity-check matrix satisfying
+    the requested conditions, however no other guarantees regarding quality are given.
+
+    For error correction codes that would perform better under certain conditions it is possible to implement the
+    ``optimization_goals`` method. This method should return a list of ``BoolectorOptimizationGoal``. Each of these
+    optimization goals will be executed in order. Only when an optimization goal cannot be optimized further,
+    or the lower bound is reached, will it continue optimizing the next goal.
+
+    Both the ``DuttaToubaCode`` and the ``SheLiCode`` are implemented using the ``BoolectorCode`` framework and can
+    be used as a reference for implementing other codes.
+    """
+
     def __init__(self, data_bits, parity_bits):
         super().__init__(data_bits=data_bits, parity_bits=parity_bits)
 

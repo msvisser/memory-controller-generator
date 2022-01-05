@@ -7,6 +7,24 @@ from .boolector import BoolectorOptimizationGoal
 
 
 class SheLiCode(BoolectorCode):
+    """
+    Implementation of the SEC-DAEC-DAAEC-TAEC code defined by She and Li in [1].
+
+    This code will always correct all 1-bit, 2-bit adjacent, 2-bit almost adjacent and 3-bit adjacent errors. For any
+    other type of error no specific behaviour is guaranteed and will likely result in a miscorrection.
+
+    This implementation uses the ``BoolectorCode`` framework to search for a parity-check matrix with the required
+    properties. Furthermore, it will try to minimize the maximum number of ones per row, the total number of ones.
+
+    For this code there is no clear analytical lower-bound on the maximum number of ones per row. Therefore,
+    the lower-bound used by the optimization goal is most likely much lower than the practical lower-bound. This
+    means that Boolector will take much longer to check that there does not exist any possible parity-check matrix
+    with a lower maximum number of ones per row. This means that getting a well optimized code can take much longer
+    than with the ``DuttaToubaCode``.
+
+    [1] X. She and N. Li, "SEU tolerant memory using error correction code", 2012.
+    """
+
     def __init__(self, data_bits):
         # Calculate the number of parity bits using the equation from the paper: k + c - 1 <= 2**(c - 2)
         parity_bits = 0
