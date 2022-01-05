@@ -7,6 +7,13 @@ from generator.error_correction import GenericCode
 
 
 class GenericController(Elaboratable):
+    """
+    Generic base class that can be used by all memory controllers.
+
+    Using this base class enforces that all memory controllers will have the same request and response interface,
+    and that the SRAM is connected in the same way.
+    """
+
     def __init__(self, code: GenericCode, addr_width: int):
         self.code = code
         self.addr_width = addr_width

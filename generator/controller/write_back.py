@@ -4,6 +4,14 @@ from .generic import GenericController
 
 
 class WriteBackController(GenericController):
+    """
+    Implementation of a write-back controller.
+
+    This memory controller will handle requests normally as long as no errors are detected. However, when the decoder
+    detects and corrects an error, the corrected value is immediately written back to the memory, to make sure that
+    the value in memory is correct. Doing this operation will block the request stream for one cycle.
+    """
+
     def elaborate(self, platform):
         m = Module()
 

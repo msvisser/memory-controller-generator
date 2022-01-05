@@ -37,7 +37,7 @@ class RefreshController(GenericController):
 
 class ForceRefreshController(GenericController):
     """
-    Implementation of an automatically refreshing memory controller.
+    Implementation of an automatically refreshing memory controller with ``force_refresh=True``.
 
     This implementation combines the `WriteBackController` with a `RefreshWrapper` to produce a controller which will
     periodically refresh memory locations.
@@ -68,7 +68,7 @@ class ForceRefreshController(GenericController):
 
 class ContinuousRefreshController(GenericController):
     """
-    Implementation of an automatically refreshing memory controller.
+    Implementation of an automatically refreshing memory controller with ``refresh_counter_width=0``.
 
     This implementation combines the `WriteBackController` with a `RefreshWrapper` to produce a controller which will
     periodically refresh memory locations.
@@ -98,7 +98,7 @@ class ContinuousRefreshController(GenericController):
 
 class TopRefreshController(GenericController):
     """
-    Implementation of an automatically refreshing memory controller.
+    Implementation of an automatically refreshing memory controller which only refreshes the top 128 words.
 
     This implementation combines the `WriteBackController` with a `RefreshWrapper` to produce a controller which will
     periodically refresh memory locations.
@@ -131,7 +131,7 @@ class TopRefreshController(GenericController):
 
 class TopBottomRefreshController(GenericController):
     """
-    Implementation of an automatically refreshing memory controller.
+    Implementation of an automatically refreshing memory controller which only refreshes the top and bottom 64 words.
 
     This implementation combines the `WriteBackController` with a `RefreshWrapper` to produce a controller which will
     periodically refresh memory locations.
