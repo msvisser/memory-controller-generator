@@ -22,7 +22,8 @@ class SheLiCode(BoolectorCode):
     with a lower maximum number of ones per row. This means that getting a well optimized code can take much longer
     than with the ``DuttaToubaCode``.
 
-    [1] X. She and N. Li, "SEU tolerant memory using error correction code", 2012.
+    [1] She, X., Li, N. and Waileen Jensen, D. (2012). SEU tolerant memory using error correction code. IEEE
+    Transactions on Nuclear Science 59 (1 PART 2), 205–210. https://doi.org/10.1109/TNS.2011.2176513
     """
 
     def __init__(self, data_bits):

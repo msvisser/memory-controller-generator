@@ -143,8 +143,8 @@ class HsiaoConstructedCode(HsiaoCode):
     matrix without doing any searching. Instead, the matrix is constructed using the recursive ``delta`` function,
     whose documentation contains more information about the algorithm.
 
-    The definition of this algorithm can be found in: L. Chen, "Hsiao-Code Check Matrices and Recursively Balanced
-    Matrices", 2013, https://arxiv.org/pdf/0803.1217.pdf.
+    The definition of this algorithm can be found in: Chen, L. (2008). Hsiao-Code Check Matrices and Recursively
+    Balanced Matrices. https://arxiv.org/abs/0803.1217.
     """
 
     def generate_matrices(self, timeout: Optional[float] = None) -> None:

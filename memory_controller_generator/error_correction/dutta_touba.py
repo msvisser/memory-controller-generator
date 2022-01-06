@@ -29,8 +29,8 @@ class DuttaToubaCode(BoolectorCode):
     of miscorrected double errors can take a long time. While this optimization is not required for the correct
     operation of the error correction code, it can improve the performance quite a bit.
 
-    [1] A. Dutta and N. Touba, "Multiple Bit Upset Tolerant Memory Using a Selective Cycle Avoidance Based
-    SEC-DED-DAEC Code", 2007.
+    [1] Dutta, A. and Touba, N. A. (2007). Multiple Bit Upset Tolerant Memory Using a Selective Cycle Avoidance Based
+    SEC-DED-DAEC Code. 25th IEEE VLSI Test Symposium (VTS’07), 349–354. https://doi.org/10.1109/VTS.2007.40
     """
 
     def __init__(self, data_bits):
