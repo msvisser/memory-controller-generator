@@ -13,7 +13,7 @@ static cxxrtl::vcd_writer vcd;
 static size_t steps = 0;
 #endif
 
-static size_t num_memory_cells = top.memory_p_mem.depth();
+static size_t num_memory_cells = top.memory_p_mem.depth;
 static size_t num_memory_bits = top.memory_p_mem.data[0].bits;
 
 // Flip the clock high and low
