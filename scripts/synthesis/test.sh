@@ -2,8 +2,8 @@
 BITS=32
 
 function run_test {
-  python ../../main.py -c $1 -b ${BITS} generate -t v |
-  yosys -c test.tcl -f verilog - |
+  python -m memory_controller_generator.testbench.example -c $1 -b ${BITS} generate -t il |
+  yosys -c test.tcl -f ilang - |
   grep "Chip area for\|Delay ="
 
   echo "--------------------------------------------------"

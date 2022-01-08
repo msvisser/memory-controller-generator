@@ -21,14 +21,13 @@ function docker_run {
 function build_test {
   echo "[$1 $2] Building"
   mkdir -p designs/$1-$2/src
-  python ../../main.py -x $1 -c $2 -b ${BITS} generate designs/$1-$2/src/top.v
+  python -m memory_controller_generator.testbench.example -x $1 -c $2 -b ${BITS} generate designs/$1-$2/src/top.v
   cp config.tcl designs/$1-$2/config.tcl
   echo "[$1 $2] Done"
 }
 
 CODE_LIST=(IdentityCode ParityCode HammingCode ExtendedHammingCode HsiaoCode HsiaoConstructedCode DuttaToubaCode SheLiCode)
-# CONTROLLER_LIST=(BasicController WriteBackController RefreshController)
-CONTROLLER_LIST=(ForceRefreshController TopRefreshController TopBottomRefreshController ContinuousRefreshController)
+CONTROLLER_LIST=(BasicController WriteBackController RefreshController ForceRefreshController TopRefreshController TopBottomRefreshController ContinuousRefreshController)
 
 DESIGN_LIST=()
 
