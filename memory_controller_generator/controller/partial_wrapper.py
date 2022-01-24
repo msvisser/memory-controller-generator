@@ -35,6 +35,7 @@ class PartialWriteWrapper(Elaboratable):
         m.d.comb += [
             self.req_in.connect(self.req_out, exclude=["write_mask"]),
             self.rsp_in.connect(self.rsp_out),
+            self.req_out.debug_ignore.eq(0),
         ]
 
         tmp_req_addr = Signal(unsigned(self.addr_width))
@@ -46,7 +47,10 @@ class PartialWriteWrapper(Elaboratable):
                 # If the current request has write enabled and a partial mask
                 with m.If(self.req_in.write_en & (~self.req_in.write_mask.all())):
                     # Mark the output request as read
-                    m.d.comb += self.req_out.write_en.eq(0),
+                    m.d.comb += [
+                        self.req_out.write_en.eq(0),
+                        self.req_out.debug_ignore.eq(1),
+                    ]
 
                     # Once the request is accepted move to the other state
                     with m.If(self.req_in.valid & self.req_in.ready):

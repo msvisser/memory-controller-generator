@@ -2,7 +2,7 @@ from typing import List
 
 from amaranth import *
 
-from .record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord
+from .record import MemoryRequestRecord, MemoryResponseRecord, SRAMInterfaceRecord, DebugInfoRecord
 from ..error_correction import GenericCode
 
 
@@ -24,6 +24,9 @@ class GenericController(Elaboratable):
 
         # SRAM interface
         self.sram = SRAMInterfaceRecord(addr_width, code.total_bits)
+
+        # Debug information record for simulation testing
+        self.debug = DebugInfoRecord(code.total_bits)
 
     def ports(self) -> List[Signal]:
         return [*self.req.ports(), *self.rsp.ports(), *self.sram.ports()]

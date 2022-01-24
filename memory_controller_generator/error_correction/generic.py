@@ -204,12 +204,16 @@ class GenericDecoder(Elaboratable):
         self.uncorrectable_error = Signal()
         """Output signalling the occurrence of an uncorrectable error"""
 
+        self.flips = Signal(unsigned(code.total_bits))
+
     def elaborate(self, platform) -> Module:
         """Elaborate the module implementation"""
         m = Module()
 
         m.submodules.error_calculator = error_calculator = self.code.error_calculator()
         m.submodules.flip_calculator = flip_calculator = self.code.flip_calculator()
+
+        m.d.comb += self.flips.eq(flip_calculator.flips)
 
         if self.code.parity_bits > 0:
             # Calculate the syndrome for this parity-check matrix

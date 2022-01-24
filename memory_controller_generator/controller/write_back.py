@@ -69,4 +69,11 @@ class WriteBackController(GenericController):
                 self.sram.write_data.eq(decoder.enc_out),
             ]
 
+        m.d.comb += [
+            self.debug.error.eq(decoder.error),
+            self.debug.uncorrectable_error.eq(decoder.uncorrectable_error),
+            self.debug.flips.eq(decoder.flips),
+        ]
+        m.d.sync += self.debug.ignore.eq(self.req.debug_ignore)
+
         return m

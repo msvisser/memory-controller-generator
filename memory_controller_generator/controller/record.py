@@ -12,6 +12,7 @@ class MemoryRequestRecord(Record):
             ("addr", addr_width, DIR_FANOUT),
             ("write_en", 1, DIR_FANOUT),
             ("write_data", data_width, DIR_FANOUT),
+            ("debug_ignore", 1, DIR_FANOUT),
         ], src_loc_at=1)
 
     def ports(self) -> [Signal]:
@@ -65,4 +66,17 @@ class SRAMInterfaceRecord(Record):
         ], src_loc_at=1)
 
     def ports(self) -> [Signal]:
+        return self.fields.values()
+
+
+class DebugInfoRecord(Record):
+    def __init__(self, total_width: int):
+        super().__init__([
+            ('error', 1, DIR_FANOUT),
+            ('uncorrectable_error', 1, DIR_FANOUT),
+            ('flips', total_width, DIR_FANOUT),
+            ('ignore', 1, DIR_FANOUT),
+        ], src_loc_at=1)
+
+    def ports(self):
         return self.fields.values()

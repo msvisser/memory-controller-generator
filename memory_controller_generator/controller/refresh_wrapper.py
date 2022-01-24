@@ -87,6 +87,7 @@ class RefreshWrapper(Elaboratable):
                     self.req_out.valid.eq(1),
                     self.req_out.addr.eq(calc_address),
                     self.req_out.write_en.eq(0),
+                    self.req_out.debug_ignore.eq(1),
                 ]
 
                 # Wait until the request is accepted

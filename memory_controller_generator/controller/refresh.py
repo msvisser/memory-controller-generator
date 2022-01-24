@@ -30,6 +30,8 @@ class RefreshController(GenericController):
             refresh.rsp_out.connect(self.rsp),
 
             controller.sram.connect(self.sram),
+
+            self.debug.eq(controller.debug),
         ]
 
         return m
@@ -61,6 +63,8 @@ class ForceRefreshController(GenericController):
             refresh.rsp_out.connect(self.rsp),
 
             controller.sram.connect(self.sram),
+
+            self.debug.eq(controller.debug),
         ]
 
         return m
@@ -91,6 +95,8 @@ class ContinuousRefreshController(GenericController):
             refresh.rsp_out.connect(self.rsp),
 
             controller.sram.connect(self.sram),
+
+            self.debug.eq(controller.debug),
         ]
 
         return m
@@ -124,6 +130,8 @@ class TopRefreshController(GenericController):
             refresh.rsp_out.connect(self.rsp),
 
             controller.sram.connect(self.sram),
+
+            self.debug.eq(controller.debug),
         ]
 
         return m
@@ -157,6 +165,8 @@ class TopBottomRefreshController(GenericController):
             refresh.rsp_out.connect(self.rsp),
 
             controller.sram.connect(self.sram),
+
+            self.debug.eq(controller.debug),
         ]
 
         return m
