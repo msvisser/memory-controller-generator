@@ -25,6 +25,7 @@ def sigint_handler(signum, frame):
 
 
 def termination_function(start, timeout):
+    global sigint_tripped
     return (time.time() - start > timeout) or sigint_tripped
 
 
