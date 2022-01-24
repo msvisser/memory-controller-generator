@@ -11,7 +11,7 @@ for design in "${DESIGNS[@]}"; do
     echo -n "," >> ${OUTPUT}
     sed -n "s/^   Chip area for module '\\\\top': \(.*\)$/\1/p" ${design}/reports/synthesis/1-synthesis.stat.rpt.strategy0 | tr -d '\n' >> ${OUTPUT}
     echo -n "," >> ${OUTPUT}
-    sed -n "5s/Design area \([0-9]*\) u^2 [0-9]*% utilization./\1/p" ${design}/reports/routing/15-resizer_sta.area.rpt | tr -d '\n' >> ${OUTPUT}
+    sed -n "5s/Design area \([0-9]*\) u^2 [0-9]*% utilization./\1/p" ${design}/reports/placement/8-resizer_sta.area.rpt | tr -d '\n' >> ${OUTPUT}
     echo -n "," >> ${OUTPUT}
     sed -n "s/Total *[^ ]* *[^ ]* *[^ ]* *\([^ ]*\) 100.0%/\1/p" ${design}/reports/routing/26-parasitics_sta.power.rpt >> ${OUTPUT}
 done

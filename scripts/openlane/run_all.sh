@@ -15,7 +15,7 @@ function docker_run {
   -v ${PDK_ROOT}:${PDK_ROOT} -e PDK_ROOT=${PDK_ROOT} \
   -v ${DESIGNS_DIR}:/openlane/designs \
   ${DOCKER_OPTIONS} ${OPENLANE_IMAGE_NAME} \
-  python3 run_designs.py --threads 16 --tag test_batch $@
+  python3 run_designs.py --threads 16 --tag test_adj $@
 }
 
 function build_test {

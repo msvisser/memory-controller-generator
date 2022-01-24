@@ -11,8 +11,10 @@ set ::env(CLOCK_PORT) "clk"
 # Ignore delays for input and output pins
 set ::env(IO_PCT) "0"
 
-set ::env(PL_TARGET_DENSITY) "0.35"
-set ::env(FP_CORE_UTIL) "20"
+set ::env(PL_TARGET_DENSITY) "0.45"
+set ::env(FP_CORE_UTIL) "30"
+
+set ::env(GLB_RT_ADJUSTMENT) 0.05
 
 set ::env(DESIGN_IS_CORE) "0"
 set ::env(DIODE_INSERTION_STRATEGY) "3"

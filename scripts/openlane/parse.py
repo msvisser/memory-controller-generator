@@ -19,12 +19,14 @@ CODES = ["IdentityCode", "ParityCode", "HammingCode", "ExtendedHammingCode", "Hs
 
 for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_REFRESH)]:
     fig_freq, ax_freq = plt.subplots()
+    fig_crit, ax_crit = plt.subplots()
     fig_area, ax_area = plt.subplots()
     fig_die_area, ax_die_area = plt.subplots()
     fig_power, ax_power = plt.subplots()
 
     for ci, controller in enumerate(controllers):
         freqs = []
+        crits = []
         areas = []
         levels = []
         die_areas = []
@@ -48,6 +50,7 @@ for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_R
                 print(f"{design:50} {clk_freq:.2f} MHz  {clk_period:.2f} ns  {synth_area:9.3f} um^2  {area:5d} um^2  {die_area:.3f} um^2  {power:5.2f} mW")
 
             freqs.append(clk_freq)
+            crits.append(clk_period)
             areas.append(area)
             levels.append(level)
             die_areas.append(die_area)
@@ -56,6 +59,7 @@ for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_R
         w = 0.9 / len(controllers)
         xs = np.arange(len(CODES)) - (((len(controllers)-1)/2) * w) + w*ci
         ax_freq.bar(xs, freqs, width=w)
+        ax_crit.bar(xs, crits, width=w)
         ax_area.bar(xs, areas, width=w)
         ax_die_area.bar(xs, die_areas, width=w)
         ax_power.bar(xs, powers, width=w)
@@ -71,6 +75,13 @@ for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_R
     ax_freq.legend(controllers)
     fig_freq.tight_layout()
     fig_freq.savefig(f"tapeout-{name}-freqency.pdf")
+
+    ax_crit.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
+    ax_crit.yaxis.grid(True)
+    ax_crit.set_ylabel("Time (ns)")
+    ax_crit.legend(controllers)
+    fig_crit.tight_layout()
+    fig_crit.savefig(f"tapeout-{name}-critical_path.pdf")
 
     ax_area.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_area.yaxis.grid(True)
