@@ -14,7 +14,7 @@ with open('all.csv') as infile:
         design_dict[design] = row
 
 CONTROLLERS = ["BasicController", "WriteBackController", "RefreshController"]
-CONTROLLERS_REFRESH = ["RefreshController", "ForceRefreshController", "ContinuousRefreshController", "TopRefreshController", "TopBottomRefreshController"]
+CONTROLLERS_REFRESH = ["RefreshController", "ForceRefreshController", "TopRefreshController", "TopBottomRefreshController", "ContinuousRefreshController"]
 CODES = ["IdentityCode", "ParityCode", "HammingCode", "ExtendedHammingCode", "HsiaoCode", "HsiaoConstructedCode", "DuttaToubaCode", "SheLiCode"]
 
 for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_REFRESH)]:
@@ -72,34 +72,34 @@ for name, controllers in [("controller", CONTROLLERS), ("refresh", CONTROLLERS_R
     ax_freq.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_freq.yaxis.grid(True)
     ax_freq.set_ylabel("Frequency (MHz)")
-    ax_freq.legend(controllers)
+    ax_freq.legend(controllers, loc="lower right")
     fig_freq.tight_layout()
     fig_freq.savefig(f"tapeout-{name}-freqency.pdf")
 
     ax_crit.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_crit.yaxis.grid(True)
     ax_crit.set_ylabel("Time (ns)")
-    ax_crit.legend(controllers)
+    ax_crit.legend(controllers, loc="lower right")
     fig_crit.tight_layout()
     fig_crit.savefig(f"tapeout-{name}-critical_path.pdf")
 
     ax_area.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_area.yaxis.grid(True)
     ax_area.set_ylabel("Area ($\\mu m^2$)")
-    ax_area.legend(controllers)
+    ax_area.legend(controllers, loc="lower right")
     fig_area.tight_layout()
     fig_area.savefig(f"tapeout-{name}-area.pdf")
 
     ax_die_area.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_die_area.yaxis.grid(True)
     ax_die_area.set_ylabel("Area ($\\mu m^2$)")
-    ax_die_area.legend(controllers)
+    ax_die_area.legend(controllers, loc="lower right")
     fig_die_area.tight_layout()
     fig_die_area.savefig(f"tapeout-{name}-die_area.pdf")
 
     ax_power.set_xticks(xs, labels=CODES, rotation=30, ha="right", rotation_mode="anchor")
     ax_power.yaxis.grid(True)
     ax_power.set_ylabel("Power ($mW$)")
-    ax_power.legend(controllers)
+    ax_power.legend(controllers, loc="lower right")
     fig_power.tight_layout()
     fig_power.savefig(f"tapeout-{name}-power.pdf")
